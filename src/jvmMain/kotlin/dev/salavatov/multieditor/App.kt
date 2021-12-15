@@ -1,26 +1,37 @@
 package dev.salavatov.multieditor
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.material.MaterialTheme
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
-
+import dev.salavatov.multifs.cloud.googledrive.GoogleAppCredentials
+import dev.salavatov.multifs.cloud.googledrive.sampleGoogleAuthenticator
+import kotlinx.coroutines.launch
 
 @Composable
 fun App() {
-    var text by remember { mutableStateOf("Hello, World!") }
+    val coroutineScope = rememberCoroutineScope()
+    var tokens by remember { mutableStateOf("") }
+    val gauth = sampleGoogleAuthenticator(
+        GoogleAppCredentials(
+            "783177635948-ishda9322n9pk96b2uc6opp729ia0a42.apps.googleusercontent.com",
+            "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"
+        )
+    )
 
     MaterialTheme {
-        Button(onClick = {
-            text = "Hello, ${getPlatformName()}"
-        }) {
-            Text(text)
+        Column {
+            Button(onClick = {
+                coroutineScope.launch {
+                    tokens = gauth.authenticate().toString()
+                }
+            }) {
+                Text("Login")
+            }
+            Text(tokens)
         }
     }
 }

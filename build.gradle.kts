@@ -10,6 +10,11 @@ repositories {
     google()
     mavenCentral()
     maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
+    maven {
+        url = uri("https://maven.pkg.jetbrains.space/public/p/ktor/eap") // for ktor 2.0.0-eap
+    }
+
+    mavenLocal() // for local testing
 }
 
 kotlin {
@@ -30,7 +35,11 @@ kotlin {
         }
     }
     sourceSets {
-        val commonMain by getting
+        val commonMain by getting {
+            dependencies {
+                // implementation("dev.salavatov:multifs:0.0.1")
+            }
+        }
         val commonTest by getting {
             dependencies {
                 implementation(kotlin("test"))
@@ -43,6 +52,8 @@ kotlin {
                 // api(compose.ui)
                 api(compose.material)
                 api(compose.desktop.currentOs)
+
+                implementation("dev.salavatov:multifs-jvm:0.0.1")
             }
         }
         val jvmTest by getting
