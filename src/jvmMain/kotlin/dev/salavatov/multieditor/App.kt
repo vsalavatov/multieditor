@@ -16,6 +16,7 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import dev.salavatov.multieditor.ui.VerticalScrollbar
 import dev.salavatov.multifs.cloud.googledrive.*
+import dev.salavatov.multifs.vfs.VFSException
 import kotlinx.coroutines.launch
 
 @Composable
@@ -35,25 +36,32 @@ fun App() {
     var fileList: List<GDriveNode> by mutableStateOf(emptyList())
     var selectedFile: GDriveFile? by mutableStateOf(null)
 
-    var fileContents = remember{ mutableStateOf(TextFieldValue("<contents>")) }
+    val fileContents = remember { mutableStateOf(TextFieldValue("<contents>")) }
+    var errorMsg: String by mutableStateOf("")
 
     MaterialTheme {
         Row {
-            Column(Modifier.padding(8.dp).fillMaxWidth(0.4f)) {
-                Button(onClick = {
-                    coroutineScope.launch {
-                        currentFolder = gdfs.root
-                        fileList = currentFolder!!.listFolder()
+            Column(Modifier.padding(8.dp).fillMaxWidth(0.5f)) {
+                Row {
+                    Button(onClick = {
+                        coroutineScope.launch {
+                            currentFolder = gdfs.root
+                            fileList = currentFolder!!.listFolder()
+                        }
+                    }) {
+                        Text("Login")
                     }
-                }) {
-                    Text("Login")
+                    Text(errorMsg)
                 }
 
-                val monospace = FontFamily.Monospace
-                @Composable
-                fun makeText(text: String, modifier: Modifier = Modifier) = Text(text, fontFamily = monospace, letterSpacing = 0.sp, modifier = modifier)
 
-                Row(modifier = Modifier.padding(50.dp)) {
+                val monospace = FontFamily.Monospace
+
+                @Composable
+                fun makeText(text: String, modifier: Modifier = Modifier) =
+                    Text(text, fontFamily = monospace, letterSpacing = 0.sp, modifier = modifier)
+
+                Row(modifier = Modifier.padding(30.dp)) {
                     makeText(currentFolder?.name ?: "<name>")
                     Spacer(modifier = Modifier.width(30.dp))
                     makeText(currentFolder?.id ?: "<id>", modifier = Modifier.width(50.dp))
@@ -66,7 +74,7 @@ fun App() {
                     }) { makeText("GO UP") }
                     Spacer(modifier = Modifier.width(30.dp))
                     Column {
-                        var fileName = remember{ mutableStateOf(TextFieldValue("folder name")) }
+                        var fileName = remember { mutableStateOf(TextFieldValue("folder name")) }
                         TextField(fileName.value, { fileName.value = it })
                         Row {
                             Button({
@@ -107,7 +115,20 @@ fun App() {
                                         Spacer(modifier = Modifier.width(30.dp))
                                         makeText(file.name)
                                         Spacer(modifier = Modifier.width(30.dp))
-                                        makeText(file.id)
+                                        makeText(file.id, modifier = Modifier.width(200.dp))
+                                        Spacer(modifier = Modifier.width(30.dp))
+                                        Button({
+                                            coroutineScope.launch {
+                                                try {
+                                                    file.remove(false)
+                                                    fileList = currentFolder?.listFolder() ?: emptyList()
+                                                } catch (e: VFSException) {
+                                                    errorMsg = e.message ?: ""
+                                                }
+                                            }
+                                        }) {
+                                            Text("delete")
+                                        }
                                     }
                                 }
                                 is GDriveFile -> {
@@ -121,11 +142,21 @@ fun App() {
                                         Spacer(modifier = Modifier.width(30.dp))
                                         makeText(file.name)
                                         Spacer(modifier = Modifier.width(30.dp))
-                                        makeText(file.id)
+                                        makeText(file.id, modifier = Modifier.width(200.dp))
                                         Spacer(modifier = Modifier.width(30.dp))
                                         makeText(file.mimeType)
                                         Spacer(modifier = Modifier.width(30.dp))
                                         makeText(file.size.toString())
+                                        Spacer(modifier = Modifier.width(30.dp))
+                                        Button({
+                                            coroutineScope.launch {
+                                                file.remove()
+                                                fileList = currentFolder?.listFolder() ?: emptyList()
+                                            }
+                                        }) {
+                                            Text("delete")
+                                        }
+
                                     }
                                 }
                             }
@@ -135,7 +166,7 @@ fun App() {
                     VerticalScrollbar(Modifier.align(Alignment.CenterEnd), scrollState)
                 }
             }
-            Column(modifier = Modifier.fillMaxWidth(1f).then(Modifier.fillMaxHeight(1f))) {
+            Column(modifier = Modifier.fillMaxWidth(0.5f).then(Modifier.fillMaxHeight(1f))) {
                 Row {
                     Button({
                         coroutineScope.launch {
