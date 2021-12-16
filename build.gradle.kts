@@ -17,6 +17,8 @@ repositories {
     mavenLocal() // for local testing
 }
 
+val serializationVersion: String by project
+
 kotlin {
     jvm {
         compilations.all {
@@ -37,6 +39,8 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$serializationVersion")
+
                 // implementation("dev.salavatov:multifs:0.0.1")
             }
         }
@@ -49,11 +53,13 @@ kotlin {
             dependencies {
                 api(compose.runtime)
                 api(compose.foundation)
-                // api(compose.ui)
+                api(compose.ui)
                 api(compose.material)
                 api(compose.desktop.currentOs)
 
                 implementation("dev.salavatov:multifs-jvm:0.0.1")
+
+                implementation("ch.qos.logback:logback-classic:1.2.6") // TODO: remove; just for testing purposes
             }
         }
         val jvmTest by getting
