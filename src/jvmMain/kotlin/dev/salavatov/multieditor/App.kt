@@ -10,19 +10,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.platform.Font
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import dev.salavatov.multieditor.ui.VerticalScrollbar
 import dev.salavatov.multifs.cloud.googledrive.*
+import dev.salavatov.multifs.systemfs.SystemFS.Companion.represent
 import dev.salavatov.multifs.vfs.VFSException
 import kotlinx.coroutines.launch
+import java.io.File
 
 @Composable
 fun App() {
     val coroutineScope = rememberCoroutineScope()
-    var tokens by remember { mutableStateOf("") }
     val gauth = CacheGoogleAuthenticator(
         GoogleAppCredentials(
             "783177635948-ishda9322n9pk96b2uc6opp729ia0a42.apps.googleusercontent.com",
@@ -37,7 +39,14 @@ fun App() {
     var selectedFile: GDriveFile? by mutableStateOf(null)
 
     val fileContents = remember { mutableStateOf(TextFieldValue("<contents>")) }
-    var errorMsg: String by mutableStateOf("")
+    var subtitle: String by mutableStateOf("")
+
+    val robotoMono = Font(File(GoogleDriveAPI::class.java.classLoader.getResource("roboto_mono/RobotoMono-Medium.ttf")?.toURI() ?: error("font not found")))
+    val robotoMonoFF = FontFamily(listOf(robotoMono))
+
+    @Composable
+    fun makeText(text: String, modifier: Modifier = Modifier) =
+        Text(text, fontFamily = robotoMonoFF, letterSpacing = 0.sp, modifier = modifier)
 
     MaterialTheme {
         Row {
@@ -51,15 +60,8 @@ fun App() {
                     }) {
                         Text("Login")
                     }
-                    Text(errorMsg)
+                    makeText(subtitle, modifier = Modifier.padding(8.dp))
                 }
-
-
-                val monospace = FontFamily.Monospace
-
-                @Composable
-                fun makeText(text: String, modifier: Modifier = Modifier) =
-                    Text(text, fontFamily = monospace, letterSpacing = 0.sp, modifier = modifier)
 
                 Row(modifier = Modifier.padding(30.dp)) {
                     makeText(currentFolder?.name ?: "<name>")
@@ -70,6 +72,7 @@ fun App() {
                         coroutineScope.launch {
                             currentFolder = currentFolder?.parent
                             fileList = currentFolder?.listFolder() ?: emptyList()
+                            subtitle = currentFolder?.absolutePath?.represent() ?: ""
                         }
                     }) { makeText("GO UP") }
                     Spacer(modifier = Modifier.width(30.dp))
@@ -81,6 +84,7 @@ fun App() {
                                 coroutineScope.launch {
                                     currentFolder?.createFolder(fileName.value.text)
                                     fileList = currentFolder?.listFolder() ?: emptyList()
+                                    subtitle = currentFolder?.absolutePath?.represent() ?: ""
                                 }
                             }) {
                                 makeText("create folder")
@@ -89,6 +93,7 @@ fun App() {
                                 coroutineScope.launch {
                                     currentFolder?.createFile(fileName.value.text)
                                     fileList = currentFolder?.listFolder() ?: emptyList()
+                                    subtitle = currentFolder?.absolutePath?.represent() ?: ""
                                 }
                             }) {
                                 makeText("create file")
@@ -109,6 +114,7 @@ fun App() {
                                         coroutineScope.launch {
                                             currentFolder = file
                                             fileList = currentFolder!!.listFolder()
+                                            subtitle = currentFolder?.absolutePath?.represent() ?: ""
                                         }
                                     }) {
                                         makeText("FOLDER")
@@ -123,7 +129,7 @@ fun App() {
                                                     file.remove(false)
                                                     fileList = currentFolder?.listFolder() ?: emptyList()
                                                 } catch (e: VFSException) {
-                                                    errorMsg = e.message ?: ""
+                                                    subtitle = e.message ?: ""
                                                 }
                                             }
                                         }) {
