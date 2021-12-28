@@ -1,26 +1,21 @@
-package dev.salavatov.multieditor
+package dev.salavatov.multieditor.multifs
 
-import dev.salavatov.multifs.cloud.googledrive.GoogleAppCredentials
-import dev.salavatov.multifs.cloud.googledrive.GoogleAuthTokens
-import dev.salavatov.multifs.cloud.googledrive.GoogleAuthenticator
-import dev.salavatov.multifs.cloud.googledrive.sampleGoogleAuthenticator
+import dev.salavatov.multifs.cloud.googledrive.*
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.nio.file.Paths
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.io.path.exists
-import kotlin.io.path.readLines
 import kotlin.io.path.readText
 import kotlin.io.path.writeText
-import kotlin.math.exp
 
-class CacheGoogleAuthenticator(appCredentials: GoogleAppCredentials) : GoogleAuthenticator {
-    private val actualAuthenticator = sampleGoogleAuthenticator(appCredentials)
-    private var init = false
+class CacheGoogleAuthenticator(val actualAuthenticator: GoogleAuthenticator) : GoogleAuthenticator {
+    private var init = AtomicBoolean(false)
 
     override suspend fun authenticate(): GoogleAuthTokens {
-        if (!init) {
-            init = true
+        if (!init.get()) {
+            init.set(true)
             val f = Paths.get(".secret/tokens")
             if (f.exists()) {
                 return Json.decodeFromString(f.readText())
