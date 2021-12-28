@@ -1,10 +1,7 @@
-package dev.salavatov.multieditor.ui
+package dev.salavatov.multieditor
 
-import dev.salavatov.multieditor.multifs.CacheGoogleAuthenticator
-import dev.salavatov.multifs.cloud.googledrive.CallbackGoogleAuthenticator
-import dev.salavatov.multifs.cloud.googledrive.GoogleAppCredentials
-import dev.salavatov.multifs.cloud.googledrive.GoogleDriveAPI
-import dev.salavatov.multifs.cloud.googledrive.GoogleDriveFS
+import dev.salavatov.multieditor.multifs.CacheGoogleAuthorizationRequester
+import dev.salavatov.multifs.cloud.googledrive.*
 import dev.salavatov.multifs.systemfs.SystemFS
 import dev.salavatov.multifs.vfs.GenericFS
 
@@ -13,8 +10,8 @@ object StorageBackends {
 
     val systemfs = Storage("Local device") { SystemFS() }
     val gdfs = Storage("Google.Drive") {
-        val googleAuth = CacheGoogleAuthenticator(
-            CallbackGoogleAuthenticator(
+        val googleAuth = CacheGoogleAuthorizationRequester(
+            CallbackGoogleAuthorizationRequester(
                 GoogleAppCredentials(
                     "783177635948-ishda9322n9pk96b2uc6opp729ia0a42.apps.googleusercontent.com",
                     "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"

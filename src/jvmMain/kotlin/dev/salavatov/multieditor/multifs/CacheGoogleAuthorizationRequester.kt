@@ -10,10 +10,11 @@ import kotlin.io.path.exists
 import kotlin.io.path.readText
 import kotlin.io.path.writeText
 
-class CacheGoogleAuthenticator(val actualAuthenticator: GoogleAuthenticator) : GoogleAuthenticator {
+class CacheGoogleAuthorizationRequester(val actualAuthorizationRequester: GoogleAuthorizationRequester):
+    GoogleAuthorizationRequester {
     private var init = AtomicBoolean(false)
 
-    override suspend fun authenticate(): GoogleAuthTokens {
+    override suspend fun requestAuthorization(): GoogleAuthTokens {
         if (!init.get()) {
             init.set(true)
             val f = Paths.get(".secret/tokens")
@@ -21,13 +22,13 @@ class CacheGoogleAuthenticator(val actualAuthenticator: GoogleAuthenticator) : G
                 return Json.decodeFromString(f.readText())
             }
         }
-        return actualAuthenticator.authenticate().also {
+        return actualAuthorizationRequester.requestAuthorization().also {
             Paths.get(".secret/tokens").writeText(Json.encodeToString(it))
         }
     }
 
-    override suspend fun refresh(expired: GoogleAuthTokens): GoogleAuthTokens {
-        return actualAuthenticator.refresh(expired).also {
+    override suspend fun refreshAuthorization(expired: GoogleAuthTokens): GoogleAuthTokens {
+        return actualAuthorizationRequester.refreshAuthorization(expired).also {
             Paths.get(".secret/tokens").writeText(Json.encodeToString(it.let {
                 if (it.refreshToken == null) {
                     return GoogleAuthTokens(it.accessToken, it.expiresIn, expired.refreshToken)
