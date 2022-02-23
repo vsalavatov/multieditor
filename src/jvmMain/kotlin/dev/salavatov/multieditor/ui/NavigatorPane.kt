@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dev.salavatov.multieditor.StorageBackends
 import dev.salavatov.multifs.vfs.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 @Composable
@@ -19,7 +20,7 @@ fun FolderContentView(folder: Folder, editorState: MutableState<EditorState>): U
 ) {
     val coroutineScope = rememberCoroutineScope()
     val children = remember { mutableStateOf(emptyList<VFSNode>()) }
-    coroutineScope.launch { children.value = folder.listFolder() }
+    coroutineScope.launch(Dispatchers.IO) { children.value = folder.listFolder() }
 
     Column(modifier = Modifier.fillMaxWidth().wrapContentHeight().padding(start = 15.dp)) {
         for (node in children.value) {
@@ -43,7 +44,7 @@ private fun FileView(
     Row(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
         Icon(Icons.Default.Edit, contentDescription = null, tint = LocalContentColor.current)
         Text(file.name, modifier = Modifier.clickable {
-            coroutineScope.launch {
+            coroutineScope.launch(Dispatchers.IO) {
                 val content = String(file.read())
                 if (!editorState.value.saving) {
                     editorState.value = EditorState(file, content, false)
@@ -96,7 +97,7 @@ fun NavigatorPane(editorState: MutableState<EditorState>, modifier: Modifier = M
                 availableBackends.value.forEach { storage ->
                     Button(onClick = {
                         availableBackends.value = availableBackends.value.filter { it != storage }
-                        coroutineScope.launch {
+                        coroutineScope.launch(Dispatchers.IO) {
                             configuredBackends.value += storage.name to storage.init()
                         }
                     }) {

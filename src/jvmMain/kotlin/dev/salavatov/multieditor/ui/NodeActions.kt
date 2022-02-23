@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dev.salavatov.multifs.vfs.File
 import dev.salavatov.multifs.vfs.Folder
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -31,7 +32,7 @@ fun AddNode(folder: Folder) {
                 Button(onClick = {
                     val fname = filename.value
                     if (fname != "") {
-                        coroutineScope.launch {
+                        coroutineScope.launch(Dispatchers.IO) {
                             folder.createFile(fname)
                         }
                         showDialog.value = false
@@ -41,7 +42,7 @@ fun AddNode(folder: Folder) {
                 Button(onClick = {
                     val fname = filename.value
                     if (fname != "") {
-                        coroutineScope.launch {
+                        coroutineScope.launch(Dispatchers.IO) {
                             folder.createFolder(fname)
                         }
                         showDialog.value = false
@@ -75,7 +76,7 @@ fun RemoveFolder(folder: Folder) {
             },
             buttons = {
                 Button(onClick = {
-                    coroutineScope.launch {
+                    coroutineScope.launch(Dispatchers.IO) {
                         folder.remove()
                     }
                     showDialog.value = false
@@ -103,7 +104,7 @@ fun RemoveFile(file: File) {
             },
             buttons = {
                 Button(onClick = {
-                    coroutineScope.launch {
+                    coroutineScope.launch(Dispatchers.IO) {
                         file.remove()
                     }
                     showDialog.value = false

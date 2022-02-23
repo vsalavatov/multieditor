@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.*
 import dev.salavatov.multifs.vfs.File
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class EditorState(val file: File?, val content: String, val saving: Boolean = false)
@@ -24,7 +25,7 @@ fun EditorPane(editorState: MutableState<EditorState>, modifier: Modifier = Modi
             val state = editorState.value
             if (state.file != null && !state.saving) {
                 editorState.value = EditorState(state.file, state.content, true)
-                coroutineScope.launch {
+                coroutineScope.launch(Dispatchers.IO) {
                     state.file.write(state.content.toByteArray())
                 }.invokeOnCompletion {
                     editorState.value = EditorState(state.file, state.content, false)
