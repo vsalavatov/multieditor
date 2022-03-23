@@ -19,8 +19,6 @@ actual object StorageBackends {
                     "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"
                 )
             )
-        googleAuth.requestAuthorization()
-        console.log("ok!")
         val gapi = GoogleDriveAPI(googleAuth)
         GoogleDriveFS(gapi)
     }
