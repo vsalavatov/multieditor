@@ -10,6 +10,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dev.salavatov.multieditor.StorageBackends
+import dev.salavatov.multieditor.state.EditorState
 import dev.salavatov.multifs.vfs.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

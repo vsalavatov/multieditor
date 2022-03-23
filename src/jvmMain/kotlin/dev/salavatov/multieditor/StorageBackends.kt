@@ -5,11 +5,9 @@ import dev.salavatov.multifs.cloud.googledrive.*
 import dev.salavatov.multifs.systemfs.SystemFS
 import dev.salavatov.multifs.vfs.GenericFS
 
-object StorageBackends {
-    data class Storage(val name: String, val init: suspend () -> GenericFS)
-
-    val systemfs = Storage("Local device") { SystemFS() }
-    val gdfs = Storage("Google.Drive") {
+actual object StorageBackends {
+    val systemfs = StorageFactory("Local device") { SystemFS() }
+    val gdfs = StorageFactory("Google.Drive") {
         val googleAuth = CacheGoogleAuthorizationRequester(
             CallbackGoogleAuthorizationRequester(
                 GoogleAppCredentials(
@@ -22,5 +20,5 @@ object StorageBackends {
         GoogleDriveFS(gapi)
     }
 
-    val backends: List<Storage> = listOf(systemfs, gdfs)
+    actual val backends: List<StorageFactory> = listOf(systemfs, gdfs)
 }

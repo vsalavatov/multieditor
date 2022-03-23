@@ -9,11 +9,10 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.*
+import dev.salavatov.multieditor.state.EditorState
 import dev.salavatov.multifs.vfs.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-
-class EditorState(val file: File?, val content: String, val saving: Boolean = false)
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable

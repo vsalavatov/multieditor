@@ -1,6 +1,6 @@
 plugins {
     kotlin("multiplatform") version "1.6.10"
-    id("org.jetbrains.compose") version "1.0.1"
+    id("org.jetbrains.compose") version "1.1.0"
 }
 
 group = "dev.salavatov"
@@ -28,7 +28,7 @@ kotlin {
             useJUnit()
         }
     }
-    js(LEGACY) {
+    js(IR) {
         binaries.executable()
         browser {
             commonWebpackConfig {
@@ -64,7 +64,15 @@ kotlin {
         }
         val jvmTest by getting
         val jsMain by getting {
-            fun kotlinw(target: String): String =
+            dependencies {
+//                implementation("org.jetbrains.kotlin:kotlin-stdlib-js")
+
+                implementation(compose.web.core)
+                implementation(compose.runtime)
+
+                implementation("dev.salavatov:multifs-js:0.0.1")
+            }
+            /*fun kotlinw(target: String): String =
                 "org.jetbrains.kotlin-wrappers:kotlin-$target"
 
             val kotlinWrappersVersion = "0.0.1-pre.284-kotlin-1.6.10"
@@ -76,7 +84,7 @@ kotlin {
                 // implementation(kotlinw("react-table"))
                 // implementation(kotlinw("styled"))
                 // other wrappers
-            }
+            }*/
         }
         val jsTest by getting
     }
