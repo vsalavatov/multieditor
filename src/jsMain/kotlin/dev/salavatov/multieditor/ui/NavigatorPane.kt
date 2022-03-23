@@ -31,7 +31,7 @@ fun NavigatorPane(editorState: MutableState<EditorState>) {
                 }
                 onClick {
                     availableBackends.value = availableBackends.value.filter { it != storage }
-                    coroutineScope.launch(Dispatchers.Default) { // TODO: ???
+                    coroutineScope.launch(Dispatchers.Unconfined) { // TODO: ???
                         configuredBackends.value += storage.name to storage.init()
                     }
                 }

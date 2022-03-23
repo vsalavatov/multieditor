@@ -3,10 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <title>JS Client</title>
+    <script src="https://apis.google.com/js/platform.js?onload=googlePlatformInit" async defer></script>
+    <!-- TODO: maybe move this init to the library code -->
+    <script>
+        function googlePlatformInit() {
+            gapi.load('auth2', function() {
+                gapi.auth2.init({
+                    "client_id": "783177635948-u07uf59d2u1uttk21bt21gl3q6597vb2.apps.googleusercontent.com"
+                })
+            })
+        }
+    </script>
 </head>
 <body>
 <div id="root">
 </div>
+<!-- <div class="g-signin2"></div>  data-onsuccess="onSignIn" -->
 <script src="multieditor.js"></script>
 </body>
 </html>
