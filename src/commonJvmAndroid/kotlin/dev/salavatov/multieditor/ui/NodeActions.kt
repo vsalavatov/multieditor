@@ -17,7 +17,6 @@ import dev.salavatov.multifs.vfs.Folder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun AddNode(folder: Folder) {
     val coroutineScope = rememberCoroutineScope()
@@ -64,7 +63,6 @@ fun AddNode(folder: Folder) {
     Icon(Icons.Default.Add, null, modifier = Modifier.clickable { showDialog.value = true })
 }
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun RemoveFolder(folder: Folder) {
     val coroutineScope = rememberCoroutineScope()
@@ -92,7 +90,6 @@ fun RemoveFolder(folder: Folder) {
     Icon(Icons.Default.Delete, null, modifier = Modifier.clickable { showDialog.value = true })
 }
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun RemoveFile(file: File) {
     val coroutineScope = rememberCoroutineScope()

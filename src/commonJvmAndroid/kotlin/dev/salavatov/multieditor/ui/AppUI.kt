@@ -1,4 +1,4 @@
-package dev.salavatov.multieditor
+package dev.salavatov.multieditor.ui
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
@@ -7,11 +7,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import dev.salavatov.multieditor.state.EditorState
-import dev.salavatov.multieditor.ui.*
 
 @Composable
-fun App() {
-    val editorState = mutableStateOf(EditorState(null, ""))
+fun AppUI() {
+    val editorState = remember { mutableStateOf(EditorState(null, "")) }
 
     MaterialTheme(colors = AppTheme.colors.material, typography = Typography(AppFonts.robotoMono())) {
         Row {

@@ -3,68 +3,63 @@ package dev.salavatov.multieditor.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.platform.Font
-import java.io.File
+import dev.salavatov.multieditor.R
 
 actual object AppFonts {
-    private fun fromResource(path: String): File = File(
-        AppFonts::class.java.classLoader!!.getResource(path)?.toURI()
-            ?: error("font not found")
-    )
-
     @Composable
     actual fun robotoMono() = remember {
         FontFamily(
             Font(
-                fromResource("font/roboto_mono_regular.ttf"),
+                R.font.roboto_mono_regular,
                 FontWeight.Normal,
                 FontStyle.Normal
             ),
             Font(
-                fromResource("font/roboto_mono_italic.ttf"),
+                R.font.roboto_mono_italic,
                 FontWeight.Normal,
                 FontStyle.Italic
             ),
             Font(
-                fromResource("font/roboto_mono_bold.ttf"),
+                R.font.roboto_mono_bold,
                 FontWeight.Bold,
                 FontStyle.Normal
             ),
             Font(
-                fromResource("font/roboto_mono_bold_italic.ttf"),
+                R.font.roboto_mono_bold_italic,
                 FontWeight.Bold,
                 FontStyle.Italic
             ),
             Font(
-                fromResource("font/roboto_mono_light.ttf"),
+                R.font.roboto_mono_light,
                 FontWeight.Light,
                 FontStyle.Normal
             ),
             Font(
-                fromResource("font/roboto_mono_light_italic.ttf"),
+                R.font.roboto_mono_light_italic,
                 FontWeight.Light,
                 FontStyle.Italic
             ),
             Font(
-                fromResource("font/roboto_mono_medium.ttf"),
+                R.font.roboto_mono_medium,
                 FontWeight.Medium,
                 FontStyle.Normal
             ),
             Font(
-                fromResource("font/roboto_mono_medium_italic.ttf"),
+                R.font.roboto_mono_medium_italic,
                 FontWeight.Medium,
                 FontStyle.Italic
             ),
             Font(
-                fromResource("font/roboto_mono_thin.ttf"),
+                R.font.roboto_mono_thin,
                 FontWeight.Thin,
                 FontStyle.Normal
             ),
             Font(
-                fromResource("font/roboto_mono_thin_italic.ttf"),
+                R.font.roboto_mono_thin_italic,
                 FontWeight.Thin,
                 FontStyle.Italic
             ),

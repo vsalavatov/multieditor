@@ -21,7 +21,10 @@ fun FolderContentView(folder: Folder, editorState: MutableState<EditorState>): U
 ) {
     val coroutineScope = rememberCoroutineScope()
     val children = remember { mutableStateOf(emptyList<VFSNode>()) }
-    coroutineScope.launch(Dispatchers.IO) { children.value = folder.listFolder() }
+
+    LaunchedEffect(key1 = Unit) {
+        coroutineScope.launch(Dispatchers.IO) { children.value = folder.listFolder() }
+    }
 
     Column(modifier = Modifier.fillMaxWidth().wrapContentHeight().padding(start = 15.dp)) {
         for (node in children.value) {

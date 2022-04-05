@@ -60,7 +60,6 @@ fun EditorPane(editorState: MutableState<EditorState>) {
                 width(100.percent)
                 height(100.percent)
             }
-
         }
     }
 }
