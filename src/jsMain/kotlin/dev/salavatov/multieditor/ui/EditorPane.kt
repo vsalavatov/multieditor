@@ -16,7 +16,7 @@ import org.jetbrains.compose.web.dom.*
 
 
 @Composable
-fun EditorPane(editorState: MutableState<EditorState>) {
+fun EditorPane(appState: AppState) {
     val coroutineScope = rememberCoroutineScope()
 
     Div({

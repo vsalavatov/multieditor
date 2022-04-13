@@ -12,6 +12,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import dev.salavatov.multieditor.expect.AlertDialog
 import dev.salavatov.multifs.vfs.File
 import dev.salavatov.multifs.vfs.Folder
 import kotlinx.coroutines.Dispatchers
@@ -50,7 +51,7 @@ fun AddNode(folder: Folder) {
             },
             modifier = Modifier.wrapContentSize(),
             title = { Text("enter name") },
-            text = {
+            content = {
                 Spacer(modifier = Modifier.height(10.dp))
                 TextField(
                     filename.value,
@@ -82,7 +83,7 @@ fun RemoveFolder(folder: Folder) {
             },
             modifier = Modifier.wrapContentSize(),
             title = { Text("folder remove") },
-            text = {
+            content = {
                 Text("are you sure you want to remove ${folder.name}?", modifier = Modifier.width(300.dp))
             }
         )
@@ -109,7 +110,7 @@ fun RemoveFile(file: File) {
             },
             modifier = Modifier.wrapContentSize(),
             title = { Text("file remove") },
-            text = {
+            content = {
                 Text("are you sure you want to remove ${file.name}?", modifier = Modifier.width(300.dp))
             }
         )

@@ -10,8 +10,10 @@ import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.job
 import kotlin.coroutines.coroutineContext
 
-actual object StorageBackends {
-    val gdfs = StorageFactory("Google.Drive") {
+actual class StorageConfig
+
+actual fun makeStorageList(config: StorageConfig): List<NamedStorageFactory> {
+    val gdfs = NamedStorageFactory("Google.Drive") {
         val googleAuth =
             PopupGoogleAuthorizationRequester(
                 GoogleAppCredentials(
@@ -22,7 +24,5 @@ actual object StorageBackends {
         val gapi = GoogleDriveAPI(googleAuth)
         GoogleDriveFS(gapi)
     }
-
-    actual val backends: List<StorageFactory>
-        get() = listOf(gdfs)
+    return listOf(gdfs)
 }

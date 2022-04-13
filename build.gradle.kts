@@ -45,6 +45,8 @@ kotlin {
             dependencies {
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${Versions.kotlinSerialization}")
 
+                api(compose.runtime)
+
                 implementation("dev.salavatov:multifs:${Versions.multifs}")
             }
         }
@@ -56,16 +58,21 @@ kotlin {
         val commonJvmAndroid = create("commonJvmAndroid") {
             dependsOn(commonMain)
             dependencies {
+                // doesn't work properly:
+//                api(compose.runtime)
+//                api(compose.foundation)
+//                api(compose.ui)
+//                api(compose.material)
             }
         }
         val jvmMain by getting {
             dependsOn(commonJvmAndroid)
 //            kotlin.srcDir("src/commonJvmAndroid/kotlin")
             dependencies {
-                api(compose.runtime)
                 api(compose.foundation)
                 api(compose.ui)
                 api(compose.material)
+
                 api(compose.desktop.currentOs)
 
                 implementation("dev.salavatov:multifs-jvm:${Versions.multifs}")
@@ -78,16 +85,15 @@ kotlin {
             dependsOn(commonJvmAndroid)
 //            kotlin.srcDir("src/commonJvmAndroid/kotlin")
             dependencies {
-                api(compose.runtime)
                 api(compose.foundation)
                 api(compose.ui)
                 api(compose.material)
-                api("androidx.appcompat:appcompat:1.4.0")
+
+                api("androidx.appcompat:appcompat:1.4.1")
                 api("androidx.core:core-ktx:1.7.0")
                 implementation("androidx.activity:activity-ktx:1.4.0")
                 implementation("androidx.activity:activity-compose:1.4.0")
-//                implementation("android.arch.navigation:navigation-fragment-ktx:1.0.0")
-//                implementation("android.arch.navigation:navigation-ui-ktx:1.0.0")
+                implementation("com.google.android.gms:play-services-auth:20.1.0")
             }
         }
         val androidTest by getting
@@ -96,7 +102,6 @@ kotlin {
 //                implementation("org.jetbrains.kotlin:kotlin-stdlib-js")
 
                 implementation(compose.web.core)
-                implementation(compose.runtime)
 
                 implementation("dev.salavatov:multifs-js:${Versions.multifs}")
             }

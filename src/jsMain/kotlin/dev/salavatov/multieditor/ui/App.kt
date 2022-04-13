@@ -2,6 +2,7 @@ package dev.salavatov.multieditor.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
+import dev.salavatov.multieditor.state.AppState
 import dev.salavatov.multieditor.state.EditorState
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Button
@@ -10,9 +11,7 @@ import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
 
 @Composable
-fun App() {
-    val editorState = mutableStateOf(EditorState(null, ""))
-
+fun AppUI(state: AppState) {
     Div {
         Span({
             style {
@@ -24,12 +23,12 @@ fun App() {
                     color = Color.gray
                 }
             }
-        }) { NavigatorPane(editorState = editorState) }
+        }) { NavigatorPane(appState) }
         Span({
             style {
                 display(DisplayStyle.InlineBlock)
             }
-        }) { EditorPane(editorState) }
+        }) { EditorPane(appState) }
     }
 
 }
