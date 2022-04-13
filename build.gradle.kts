@@ -59,10 +59,10 @@ kotlin {
             dependsOn(commonMain)
             dependencies {
                 // doesn't work properly:
-//                api(compose.runtime)
-//                api(compose.foundation)
-//                api(compose.ui)
-//                api(compose.material)
+                api(compose.runtime)
+                api(compose.foundation)
+                api(compose.ui)
+                api(compose.material)
             }
         }
         val jvmMain by getting {
@@ -147,18 +147,14 @@ android {
 
 // some strange non-existent module called "androidAndroidTestRelease" appears after gradle configuration
 // here is some fix from the internet (https://discuss.kotlinlang.org/t/disabling-androidandroidtestrelease-source-set-in-gradle-kotlin-dsl-script/21448)
-subprojects {
-    afterEvaluate {
-        project.extensions.findByType<KotlinMultiplatformExtension>()?.let { ext ->
-            ext.sourceSets.removeAll { sourceSet ->
-                setOf(
-                    "androidAndroidTestRelease",
-                    "androidTestFixtures",
-                    "androidTestFixturesDebug",
-                    "androidTestFixturesRelease",
-                ).contains(sourceSet.name)
-            }
-        }
+project.extensions.findByType<KotlinMultiplatformExtension>()?.let { ext ->
+    ext.sourceSets.removeAll { sourceSet ->
+        setOf(
+            "androidAndroidTestRelease",
+            "androidTestFixtures",
+            "androidTestFixturesDebug",
+            "androidTestFixturesRelease",
+        ).contains(sourceSet.name)
     }
 }
 
