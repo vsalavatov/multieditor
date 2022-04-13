@@ -4,8 +4,9 @@ object Versions {
     const val compose = "1.1.0"
 
     const val androidGradlePlugin = "7.0.0"
-    const val androidMinSdk = 31
-    const val androidTargetSdk = 31
+    const val androidMinSdk = 29
+    const val androidTargetSdk = 29
+    const val androidCompileSdk = 31
 
     const val multifs = "0.0.1"
 }

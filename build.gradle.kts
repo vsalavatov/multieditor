@@ -94,6 +94,7 @@ kotlin {
                 implementation("androidx.activity:activity-ktx:1.4.0")
                 implementation("androidx.activity:activity-compose:1.4.0")
                 implementation("com.google.android.gms:play-services-auth:20.1.0")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.6.0")
             }
         }
         val androidTest by getting
@@ -138,10 +139,10 @@ android {
         }
     }
 
-    compileSdkVersion(Versions.androidTargetSdk)
+    compileSdk = Versions.androidCompileSdk
     defaultConfig {
-        minSdkVersion(Versions.androidMinSdk)
-        targetSdkVersion(Versions.androidTargetSdk)
+        minSdk = Versions.androidMinSdk
+        targetSdk = Versions.androidTargetSdk
     }
 }
 

@@ -24,37 +24,38 @@ import dev.salavatov.multifs.cloud.googledrive.GoogleAuthorizationRequester
 
 class IntentGoogleAuthorizationRequester(private val baseActivity: Activity, private val googleAppCredentials: GoogleAppCredentials) : GoogleAuthorizationRequester {
     override suspend fun requestAuthorization(): GoogleAuthTokens {
-        val startForResult =
-            rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
-                if (result.resultCode == Activity.RESULT_OK) {
-                    val intent = result.data
-                    if (result.data != null) {
-                        val task: Task<GoogleSignInAccount> =
-                            GoogleSignIn.getSignedInAccountFromIntent(intent)
-                        handleSignInResult(task)
-                    }
-                }
-            }
-        val googleSignInClient = getGoogleLoginAuth("")
-        Button(
-            onClick = {
-                startForResult.launch(googleSignInClient.signInIntent)
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 16.dp, end = 16.dp),
-            shape = RoundedCornerShape(6.dp),
-            colors = ButtonDefaults.buttonColors(
-                backgroundColor = Color.Black,
-                contentColor = Color.White
-            )
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.common_google_signin_btn_icon_dark),
-                contentDescription = ""
-            )
-            Text(text = "Sign in with Google", modifier = Modifier.padding(6.dp))
-        }
+//        val startForResult =
+//            rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
+//                if (result.resultCode == Activity.RESULT_OK) {
+//                    val intent = result.data
+//                    if (result.data != null) {
+//                        val task: Task<GoogleSignInAccount> =
+//                            GoogleSignIn.getSignedInAccountFromIntent(intent)
+//                        handleSignInResult(task)
+//                    }
+//                }
+//            }
+//        val googleSignInClient = getGoogleLoginAuth("")
+//        Button(
+//            onClick = {
+//                startForResult.launch(googleSignInClient.signInIntent)
+//            },
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .padding(start = 16.dp, end = 16.dp),
+//            shape = RoundedCornerShape(6.dp),
+//            colors = ButtonDefaults.buttonColors(
+//                backgroundColor = Color.Black,
+//                contentColor = Color.White
+//            )
+//        ) {
+//            Image(
+//                painter = painterResource(id = R.drawable.common_google_signin_btn_icon_dark),
+//                contentDescription = ""
+//            )
+//            Text(text = "Sign in with Google", modifier = Modifier.padding(6.dp))
+//        }
+        TODO("Not yet implemented")
     }
 
     override suspend fun refreshAuthorization(expired: GoogleAuthTokens): GoogleAuthTokens {
