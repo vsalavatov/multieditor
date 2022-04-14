@@ -1,7 +1,8 @@
 package dev.salavatov.multieditor.ui
 
 import androidx.compose.runtime.*
-import dev.salavatov.multieditor.StorageBackends
+import dev.salavatov.multieditor.NamedStorage
+import dev.salavatov.multieditor.state.AppState
 import dev.salavatov.multieditor.state.EditorState
 import dev.salavatov.multifs.vfs.*
 import kotlinx.coroutines.Dispatchers
@@ -14,11 +15,11 @@ import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
 
 @Composable
-fun NavigatorPane(editorState: MutableState<EditorState>) {
+fun NavigatorPane(appState: AppState) {
     val coroutineScope = rememberCoroutineScope()
 
-    val availableBackends = remember { mutableStateOf(StorageBackends.backends) }
-    val configuredBackends = remember { mutableStateOf(emptyList<Pair<String, GenericFS>>()) }
+    val availableBackends = remember { appState.navigation.availableStorages }
+    val configuredBackends = remember { appState.navigation.configuredStorages }
 
     Div({
         style {
@@ -34,7 +35,7 @@ fun NavigatorPane(editorState: MutableState<EditorState>) {
                 onClick {
                     availableBackends.value = availableBackends.value.filter { it != storage }
                     coroutineScope.launch(Dispatchers.Unconfined) { // TODO: ???
-                        configuredBackends.value += storage.name to storage.init()
+                        configuredBackends.value += NamedStorage(storage.name, storage.init())
                     }
                 }
             }) {
@@ -48,16 +49,15 @@ fun NavigatorPane(editorState: MutableState<EditorState>) {
         }) {}
         configuredBackends.value.forEachIndexed { index, _ ->
             FileTreeView(
-                configuredBackends.value[index].first,
-                configuredBackends.value[index].second,
-                editorState,
+                configuredBackends.value[index],
+                appState.editor,
             )
         }
     }
 }
 
 @Composable
-fun FileTreeView(name: String, fs: GenericFS, editorState: MutableState<EditorState>): Unit =
+fun FileTreeView(namedStorage: NamedStorage, editorState: EditorState): Unit =
     Div({
         style {
             width(100.percent)
@@ -66,16 +66,16 @@ fun FileTreeView(name: String, fs: GenericFS, editorState: MutableState<EditorSt
         }
     }) {
         Expandable({
-            Span({ style { textDecoration("bold") } }) { Text(name) }
+            Span({ style { textDecoration("bold") } }) { Text(namedStorage.name) }
 //            AddNode(fs.root)
         }, {
-            FolderContentView(fs.root, editorState)
+            FolderContentView(namedStorage.storage.root, editorState)
         })
     }
 
 
 @Composable
-fun FolderContentView(folder: Folder, editorState: MutableState<EditorState>): Unit = Div({
+fun FolderContentView(folder: Folder, editorState: EditorState): Unit = Div({
     style {
         width(100.percent)
         height(auto)
@@ -108,7 +108,7 @@ fun FolderContentView(folder: Folder, editorState: MutableState<EditorState>): U
 
 @Composable
 private fun FileView(
-    file: File, editorState: MutableState<EditorState>
+    file: File, editorState: EditorState
 ): Unit {
     val coroutineScope = rememberCoroutineScope()
     Div({
@@ -123,8 +123,9 @@ private fun FileView(
             onClick {
                 coroutineScope.launch(Dispatchers.Unconfined) {
                     val content = file.read().decodeToString()
-                    if (!editorState.value.saving) {
-                        editorState.value = EditorState(file, content, false)
+                    if (!editorState.saving.value) {
+                        editorState.content.value = content
+                        editorState.file.value = file
                     }
                 }
             }
@@ -135,7 +136,7 @@ private fun FileView(
 
 
 @Composable
-fun FolderView(folder: Folder, editorState: MutableState<EditorState>): Unit = Div({
+fun FolderView(folder: Folder, editorState: EditorState): Unit = Div({
     style {
         width(100.percent)
         height(auto)

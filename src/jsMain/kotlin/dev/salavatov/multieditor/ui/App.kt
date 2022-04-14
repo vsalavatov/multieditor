@@ -11,7 +11,7 @@ import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
 
 @Composable
-fun AppUI(state: AppState) {
+fun AppUI(appState: AppState) {
     Div {
         Span({
             style {

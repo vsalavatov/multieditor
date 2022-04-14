@@ -95,6 +95,7 @@ kotlin {
                 implementation("androidx.activity:activity-compose:1.4.0")
                 implementation("com.google.android.gms:play-services-auth:20.1.0")
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.6.0")
+                implementation("io.ktor:ktor-client-okhttp:2.0.0")
             }
         }
         val androidTest by getting

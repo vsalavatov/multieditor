@@ -10,9 +10,7 @@ import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.job
 import kotlin.coroutines.coroutineContext
 
-actual class StorageConfig
-
-actual fun makeStorageList(config: StorageConfig): List<NamedStorageFactory> {
+fun makeStorageList(): List<NamedStorageFactory> {
     val gdfs = NamedStorageFactory("Google.Drive") {
         val googleAuth =
             PopupGoogleAuthorizationRequester(

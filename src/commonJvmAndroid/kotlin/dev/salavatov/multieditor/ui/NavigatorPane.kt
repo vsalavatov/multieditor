@@ -53,6 +53,7 @@ private fun FileView(
                 val content = String(file.read())
                 if (!editorState.saving.value) {
                     editorState.content.value = content
+                    editorState.file.value = file
                 }
             }
         })

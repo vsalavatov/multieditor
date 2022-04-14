@@ -1,9 +1,7 @@
 package dev.salavatov.multieditor.ui
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
+import dev.salavatov.multieditor.state.AppState
 import dev.salavatov.multieditor.state.EditorState
 import io.ktor.utils.io.core.*
 import kotlinx.coroutines.Dispatchers
@@ -18,6 +16,7 @@ import org.jetbrains.compose.web.dom.*
 @Composable
 fun EditorPane(appState: AppState) {
     val coroutineScope = rememberCoroutineScope()
+    val editorState = remember { appState.editor }
 
     Div({
         style {
@@ -29,31 +28,35 @@ fun EditorPane(appState: AppState) {
         Span {
             Button({
                 onClick {
-                    val state = editorState.value
-                    if (state.file != null && !state.saving) {
-                        editorState.value = EditorState(state.file, state.content, true)
+                    console.log("click", editorState.file.value, editorState.saving.value)
+                    val file = editorState.file.value
+                    if (file != null && !editorState.saving.value) {
+                        editorState.saving.value = true
                         coroutineScope.launch(Dispatchers.Unconfined) {
-                            state.file.write(state.content.toByteArray())
+                            file.write(editorState.content.value.toByteArray())
                         }.invokeOnCompletion {
-                            editorState.value = EditorState(state.file, state.content, false)
+                            editorState.saving.value = false
                         }
                     }
                 }
             }) {
                 Text("save")
             }
-            Span({ style { paddingLeft(10.px); paddingRight(10.px) } }) { Text(editorState.value.file?.name ?: "") }
+            Span({ style { paddingLeft(10.px); paddingRight(10.px) } }) { Text(editorState.file.value?.name ?: "") }
             Text(
-                if (editorState.value.saving) {
+                if (editorState.saving.value) {
                     "saving..."
                 } else {
                     ""
                 }
             )
         }
-        TextArea(editorState.value.content) {
+        TextArea(editorState.content.value) {
             wrap(TextAreaWrap.Off)
-            onInput { editorState.value = EditorState(editorState.value.file, it.value) }
+            onInput {
+                editorState.content.value = it.value
+                console.log("change")
+            }
             placeholder("content...")
             style {
                 display(DisplayStyle.Block)
