@@ -22,17 +22,21 @@ fun EditorPane(appState: AppState, modifier: Modifier = Modifier) {
 
     val editorState = remember { appState.editor }
 
+    val saveContent: () -> Unit = {
+        val file = editorState.file.value
+        if (file != null && !editorState.saving.value) {
+            editorState.saving.value = true
+            coroutineScope.launch(Dispatchers.IO) {
+                file.write(editorState.content.value.toByteArray())
+            }.invokeOnCompletion {
+                editorState.saving.value = false
+            }
+        }
+    }
+
     Column(modifier = modifier.then(Modifier.fillMaxSize(1.0f)).onPreviewKeyEvent {
         if (it.isCtrlPressed && it.key == Key.S) {
-            val file = editorState.file.value
-            if (file != null && !editorState.saving.value) {
-                editorState.saving.value = true
-                coroutineScope.launch(Dispatchers.IO) {
-                    file.write(editorState.content.value.toByteArray())
-                }.invokeOnCompletion {
-                    editorState.saving.value = false
-                }
-            }
+            saveContent()
             true
         } else {
             false
@@ -40,6 +44,7 @@ fun EditorPane(appState: AppState, modifier: Modifier = Modifier) {
     }) {
         Row(modifier = Modifier.fillMaxWidth(1f).wrapContentHeight()) {
             Text(editorState.file.value?.name ?: "", modifier = Modifier.fillMaxWidth(0.5f))
+            Button(onClick = saveContent) { Text("save") }
             Text(if (editorState.saving.value) { "saving..." } else { "" })
         }
         Divider(modifier = Modifier.fillMaxWidth(), color = Color.LightGray)

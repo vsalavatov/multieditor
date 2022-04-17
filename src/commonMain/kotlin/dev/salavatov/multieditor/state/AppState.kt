@@ -11,7 +11,7 @@ class AppState(
 )
 
 @Composable
-fun makeStartState(storages: List<NamedStorageFactory>): AppState {
+fun makeStartAppState(storages: List<NamedStorageFactory>): AppState {
     return remember {
         AppState(
             EditorState(
