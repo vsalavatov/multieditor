@@ -7,11 +7,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import dev.salavatov.multifs.cloud.googledrive.GoogleAppCredentials
+import dev.salavatov.multifs.cloud.googledrive.GoogleDriveAPI
 import dev.salavatov.multifs.cloud.googledrive.IntentGoogleAuthorizationRequester
 import kotlinx.coroutines.CompletableDeferred
 
 @Composable
-fun makeGoogleAuthorizationRequester(googleAppCredentials: GoogleAppCredentials): IntentGoogleAuthorizationRequester {
+fun makeGoogleAuthorizationRequester(
+    googleAppCredentials: GoogleAppCredentials,
+    scope: GoogleDriveAPI.Companion.DriveScope
+): IntentGoogleAuthorizationRequester {
     var resultFuture = remember { CompletableDeferred<ActivityResult>() }
     val startForResult =
         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
@@ -19,6 +23,7 @@ fun makeGoogleAuthorizationRequester(googleAppCredentials: GoogleAppCredentials)
         }
     return IntentGoogleAuthorizationRequester(
         googleAppCredentials,
+        scope,
         LocalContext.current,
     ) { intent ->
         resultFuture = CompletableDeferred<ActivityResult>()
