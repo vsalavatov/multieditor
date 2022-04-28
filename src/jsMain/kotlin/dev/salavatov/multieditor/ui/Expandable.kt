@@ -1,53 +1,60 @@
 package dev.salavatov.multieditor.ui
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
+import org.jetbrains.compose.web.ExperimentalComposeWebApi
 import org.jetbrains.compose.web.css.*
-import org.jetbrains.compose.web.css.keywords.CSSAutoKeyword
 import org.jetbrains.compose.web.css.keywords.auto
 import org.jetbrains.compose.web.dom.Div
-import org.jetbrains.compose.web.dom.Button
 import org.jetbrains.compose.web.dom.Span
-import org.jetbrains.compose.web.dom.Text
-import org.w3c.dom.Image
-import kotlin.math.exp
+
+@OptIn(ExperimentalComposeWebApi::class)
+object ExpandableStyle : StyleSheet() {
+    val container by style {
+        position(Position.Relative)
+        height(auto)
+        width(100.percent)
+    }
+    val collapsed by style {
+        self + before style {
+            property("content", "\"▲\"")
+            marginRight(5.px)
+            display(DisplayStyle.InlineBlock)
+            transform {
+                rotate(90.deg)
+            }
+        }
+    }
+    val expanded by style {
+        self + before style {
+            property("content", "\"▲\"")
+            marginRight(5.px)
+            display(DisplayStyle.InlineBlock)
+            transform {
+                rotate(180.deg)
+            }
+        }
+    }
+}
 
 @Composable
 fun Expandable(preview: @Composable () -> Unit, content: @Composable () -> Unit) {
-    val expanded = remember { mutableStateOf(false) }
+    var expanded by remember { mutableStateOf(false) }
     return Div({
-        style {
-            height(auto)
-            width(100.percent)
-        }
+        classes(
+            ExpandableStyle.container, if (expanded) {
+                ExpandableStyle.expanded
+            } else {
+                ExpandableStyle.collapsed
+            }
+        )
     }) {
         Span({
             onClick {
-                expanded.value = expanded.value.xor(true)
-            }
-            if (!expanded.value) {
-                style {
-                    color(Color.darkgray)
-                }
+                expanded = expanded.xor(true)
             }
         }) {
             preview()
         }
-        if (expanded.value) content()
+        if (expanded) content()
     }
-    /*(
-    {
-        Row(modifier = Modifier.wrapContentHeight().fillMaxWidth()) {
-            Icon(if (expanded.value) {
-                Icons.Default.KeyboardArrowDown
-            } else {
-                Icons.Default.KeyboardArrowRight
-            }, contentDescription = null, tint = LocalContentColor.current)
-            preview()
-        }
-        if (expanded.value) {
-            content()
-        }
-    }*/
 }

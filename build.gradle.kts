@@ -12,9 +12,6 @@ version = "1.0"
 repositories {
     google()
     maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
-    maven {
-        url = uri("https://maven.pkg.jetbrains.space/public/p/ktor/eap") // for ktor 2.0.0-eap
-    }
     mavenCentral()
 
     mavenLocal() // for local testing
@@ -24,6 +21,10 @@ kotlin {
     jvm {
         compilations.all {
             kotlinOptions.jvmTarget = "1.8"
+            kotlinOptions.freeCompilerArgs += listOf(
+                "-Xuse-experimental=kotlinx.coroutines.ExperimentalCoroutinesApi",
+                "-opt-in=kotlin.RequiresOptIn",
+            )
         }
         testRuns["test"].executionTask.configure {
             useJUnit()
@@ -43,6 +44,7 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${Versions.kotlinCoroutines}")
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${Versions.kotlinSerialization}")
 
                 api(compose.runtime)
@@ -58,7 +60,6 @@ kotlin {
         val commonJvmAndroid = create("commonJvmAndroid") {
             dependsOn(commonMain)
             dependencies {
-                // doesn't work properly:
                 api(compose.runtime)
                 api(compose.foundation)
                 api(compose.ui)
@@ -67,7 +68,6 @@ kotlin {
         }
         val jvmMain by getting {
             dependsOn(commonJvmAndroid)
-//            kotlin.srcDir("src/commonJvmAndroid/kotlin")
             dependencies {
                 api(compose.foundation)
                 api(compose.ui)
@@ -76,14 +76,11 @@ kotlin {
                 api(compose.desktop.currentOs)
 
                 implementation("dev.salavatov:multifs-jvm:${Versions.multifs}")
-
-                implementation("ch.qos.logback:logback-classic:1.2.6") // TODO: remove; just for testing purposes
             }
         }
         val jvmTest by getting
         val androidMain by getting {
             dependsOn(commonJvmAndroid)
-//            kotlin.srcDir("src/commonJvmAndroid/kotlin")
             dependencies {
                 api(compose.foundation)
                 api(compose.ui)
@@ -94,32 +91,19 @@ kotlin {
                 implementation("androidx.activity:activity-ktx:1.4.0")
                 implementation("androidx.activity:activity-compose:1.4.0")
                 implementation("com.google.android.gms:play-services-auth:20.1.0")
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.6.0")
-                implementation("io.ktor:ktor-client-okhttp:2.0.0")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:${Versions.kotlinCoroutines}")
+
+//                implementation("dev.salavatov:multifs-android:${Versions.multifs}")
+//                implementation("io.ktor:ktor-client-okhttp:2.0.0")
             }
         }
         val androidTest by getting
         val jsMain by getting {
             dependencies {
-//                implementation("org.jetbrains.kotlin:kotlin-stdlib-js")
-
                 implementation(compose.web.core)
 
                 implementation("dev.salavatov:multifs-js:${Versions.multifs}")
             }
-            /*fun kotlinw(target: String): String =
-                "org.jetbrains.kotlin-wrappers:kotlin-$target"
-
-            val kotlinWrappersVersion = "0.0.1-pre.284-kotlin-1.6.10"
-
-            dependencies {
-                implementation(project.dependencies.enforcedPlatform(kotlinw("wrappers-bom:${kotlinWrappersVersion}")))
-                implementation(kotlinw("react"))
-                implementation(kotlinw("react-dom"))
-                // implementation(kotlinw("react-table"))
-                // implementation(kotlinw("styled"))
-                // other wrappers
-            }*/
         }
         val jsTest by getting
     }
@@ -160,14 +144,15 @@ project.extensions.findByType<KotlinMultiplatformExtension>()?.let { ext ->
     }
 }
 
-//dependencies {
-//    implementation(kotlin("stdlib-jdk8"))
-//}
-//val compileKotlin: KotlinCompile by tasks
-//compileKotlin.kotlinOptions {
-//    jvmTarget = "1.8"
-//}
-//val compileTestKotlin: KotlinCompile by tasks
-//compileTestKotlin.kotlinOptions {
-//    jvmTarget = "1.8"
+// kotlin 1.6.20 isn't supported by compose 1.1.0
+// Suppress Compose Kotlin compiler compatibility warning
+//allprojects {
+//    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+//        kotlinOptions {
+//            freeCompilerArgs = freeCompilerArgs + listOf(
+//                "-P",
+//                "plugin:androidx.compose.compiler.plugins.kotlin:suppressKotlinVersionCompatibilityCheck=true"
+//            )
+//        }
+//    }
 //}

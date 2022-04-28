@@ -9,52 +9,45 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.*
+import androidx.compose.ui.unit.dp
 import dev.salavatov.multieditor.state.AppState
-import dev.salavatov.multieditor.state.EditorState
-import dev.salavatov.multifs.vfs.File
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun EditorPane(appState: AppState, modifier: Modifier = Modifier) {
     val coroutineScope = rememberCoroutineScope()
-
     val editorState = remember { appState.editor }
-
-    val saveContent: () -> Unit = {
-        val file = editorState.file.value
-        if (file != null && !editorState.saving.value) {
-            editorState.saving.value = true
-            coroutineScope.launch(Dispatchers.IO) {
-                file.write(editorState.content.value.toByteArray())
-            }.invokeOnCompletion {
-                editorState.saving.value = false
-            }
-        }
-    }
 
     Column(modifier = modifier.then(Modifier.fillMaxSize(1.0f)).onPreviewKeyEvent {
         if (it.isCtrlPressed && it.key == Key.S) {
-            saveContent()
+            with(appState.editor) { coroutineScope.launchSaveContent() }
             true
         } else {
             false
         }
     }) {
         Row(modifier = Modifier.fillMaxWidth(1f).wrapContentHeight()) {
-            Text(editorState.file.value?.name ?: "", modifier = Modifier.fillMaxWidth(0.5f))
-            Button(onClick = saveContent) { Text("save") }
-            Text(if (editorState.saving.value) { "saving..." } else { "" })
+            Text(editorState.file?.name ?: "", modifier = Modifier.fillMaxWidth(0.5f).padding(10.dp))
+            Button(
+                onClick = { with(appState.editor) { coroutineScope.launchSaveContent() } }
+            ) { Text("save") }
+            Text(
+                if (editorState.saving) {
+                    "saving..."
+                } else {
+                    ""
+                },
+                modifier = Modifier.padding(10.dp)
+            )
         }
         Divider(modifier = Modifier.fillMaxWidth(), color = Color.LightGray)
         CompositionLocalProvider(LocalTextSelectionColors provides TextSelectionColors(Color.White, Color.LightGray)) {
             TextField(
-                editorState.content.value,
-                { editorState.content.value = it },
+                editorState.content,
+                { editorState.content = it },
                 modifier = Modifier.fillMaxWidth().fillMaxHeight(),
                 colors = TextFieldDefaults.outlinedTextFieldColors(cursorColor = Color.DarkGray),
-                placeholder = { Text("content...", color = Color.LightGray) }
+                placeholder = { Text("type here...", color = Color.LightGray) }
             )
         }
     }

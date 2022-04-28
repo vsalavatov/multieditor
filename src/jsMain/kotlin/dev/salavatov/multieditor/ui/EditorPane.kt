@@ -1,11 +1,9 @@
 package dev.salavatov.multieditor.ui
 
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import dev.salavatov.multieditor.state.AppState
-import dev.salavatov.multieditor.state.EditorState
-import io.ktor.utils.io.core.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import org.jetbrains.compose.web.attributes.TextAreaWrap
 import org.jetbrains.compose.web.attributes.placeholder
 import org.jetbrains.compose.web.attributes.wrap
@@ -25,43 +23,44 @@ fun EditorPane(appState: AppState) {
             display(DisplayStyle.InlineBlock)
         }
     }) {
-        Span {
+        Div {
             Button({
                 onClick {
-                    console.log("click", editorState.file.value, editorState.saving.value)
-                    val file = editorState.file.value
-                    if (file != null && !editorState.saving.value) {
-                        editorState.saving.value = true
-                        coroutineScope.launch(Dispatchers.Unconfined) {
-                            file.write(editorState.content.value.toByteArray())
-                        }.invokeOnCompletion {
-                            editorState.saving.value = false
-                        }
-                    }
+                    with(appState.editor) { coroutineScope.launchSaveContent() }
                 }
             }) {
                 Text("save")
             }
-            Span({ style { paddingLeft(10.px); paddingRight(10.px) } }) { Text(editorState.file.value?.name ?: "") }
+            Span({ style { paddingLeft(10.px); paddingRight(10.px) } }) { Text(editorState.fileState.value?.name ?: "") }
             Text(
-                if (editorState.saving.value) {
+                if (editorState.savingState.value) {
                     "saving..."
                 } else {
                     ""
                 }
             )
         }
-        TextArea(editorState.content.value) {
-            wrap(TextAreaWrap.Off)
-            onInput {
-                editorState.content.value = it.value
-                console.log("change")
-            }
-            placeholder("content...")
+        Div({
             style {
-                display(DisplayStyle.Block)
-                width(100.percent)
-                height(100.percent)
+                marginTop(10.px)
+            }
+        }) {
+            TextArea(editorState.content) {
+                wrap(TextAreaWrap.Off)
+                onInput {
+                    editorState.content = it.value
+                }
+                placeholder("content...")
+                style {
+                    display(DisplayStyle.Block)
+                    position(Position.Absolute)
+                    width(85.percent)
+                    height(93.percent)
+                    property("resize", "none")
+                    property("border", "none")
+                    property("outline", "none")
+                    fontSize(1.cssRem)
+                }
             }
         }
     }

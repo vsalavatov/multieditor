@@ -2,50 +2,60 @@ package dev.salavatov.multieditor.ui
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
+import androidx.compose.material.Button
+import androidx.compose.material.Icon
+import androidx.compose.material.Text
+import androidx.compose.material.TextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dev.salavatov.multieditor.expect.AlertDialog
+import dev.salavatov.multieditor.expect.MultifsDispatcher
 import dev.salavatov.multifs.vfs.File
 import dev.salavatov.multifs.vfs.Folder
+import dev.salavatov.multifs.vfs.VFSNode
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 @Composable
-fun AddNode(folder: Folder) {
+fun AddNode(folder: Folder, modifyChildren: (SnapshotStateList<VFSNode>.() -> Unit) -> Unit) {
     val coroutineScope = rememberCoroutineScope()
-    val showDialog = remember { mutableStateOf(false) }
-    val filename = remember { mutableStateOf("") }
-    if (showDialog.value) {
+    var showDialog: Boolean by remember { mutableStateOf(false) }
+    var filename by remember { mutableStateOf("") }
+
+    if (showDialog) {
         AlertDialog(
             onDismissRequest = {
-                showDialog.value = false
+                showDialog = false
             },
             buttons = {
                 Button(onClick = {
-                    val fname = filename.value
+                    val fname = filename
                     if (fname != "") {
                         coroutineScope.launch(Dispatchers.IO) {
-                            folder.createFile(fname)
+                            val f = folder.createFile(fname)
+                            modifyChildren {
+                                add(f)
+                            }
                         }
-                        showDialog.value = false
+                        showDialog = false
                     }
                 }) { Text("add file") }
                 Spacer(modifier = Modifier.width(20.dp))
                 Button(onClick = {
-                    val fname = filename.value
+                    val fname = filename
                     if (fname != "") {
-                        coroutineScope.launch(Dispatchers.IO) {
-                            folder.createFolder(fname)
+                        coroutineScope.launch(MultifsDispatcher()) {
+                            val f = folder.createFolder(fname)
+                            modifyChildren {
+                                add(f)
+                            }
                         }
-                        showDialog.value = false
+                        showDialog = false
                     }
                 }) { Text("add folder") }
             },
@@ -54,31 +64,34 @@ fun AddNode(folder: Folder) {
             content = {
                 Spacer(modifier = Modifier.height(10.dp))
                 TextField(
-                    filename.value,
-                    { filename.value = it },
+                    filename,
+                    { filename = it },
                     modifier = Modifier.width(300.dp).wrapContentHeight(),
                     singleLine = true
                 )
             })
     }
-    Icon(Icons.Default.Add, null, modifier = Modifier.clickable { showDialog.value = true })
+    Icon(Icons.Default.Add, null, modifier = Modifier.clickable { showDialog = true })
 }
 
 @Composable
-fun RemoveFolder(folder: Folder) {
+fun RemoveFolder(folder: Folder, modifyChildren: (SnapshotStateList<VFSNode>.() -> Unit) -> Unit) {
     val coroutineScope = rememberCoroutineScope()
-    val showDialog = remember { mutableStateOf(false) }
-    if (showDialog.value) {
+    var showDialog by remember { mutableStateOf(false) }
+    if (showDialog) {
         AlertDialog(
             onDismissRequest = {
-                showDialog.value = false
+                showDialog = false
             },
             buttons = {
                 Button(onClick = {
-                    coroutineScope.launch(Dispatchers.IO) {
+                    coroutineScope.launch(MultifsDispatcher()) {
                         folder.remove()
+                        modifyChildren {
+                            removeAll { it == folder }
+                        }
                     }
-                    showDialog.value = false
+                    showDialog = false
                 }) { Text("sure!") }
             },
             modifier = Modifier.wrapContentSize(),
@@ -88,24 +101,27 @@ fun RemoveFolder(folder: Folder) {
             }
         )
     }
-    Icon(Icons.Default.Delete, null, modifier = Modifier.clickable { showDialog.value = true })
+    Icon(Icons.Default.Delete, null, modifier = Modifier.clickable { showDialog = true })
 }
 
 @Composable
-fun RemoveFile(file: File) {
+fun RemoveFile(file: File, modifyChildren: (SnapshotStateList<VFSNode>.() -> Unit) -> Unit) {
     val coroutineScope = rememberCoroutineScope()
-    val showDialog = remember { mutableStateOf(false) }
-    if (showDialog.value) {
+    var showDialog by remember { mutableStateOf(false) }
+    if (showDialog) {
         AlertDialog(
             onDismissRequest = {
-                showDialog.value = false
+                showDialog = false
             },
             buttons = {
                 Button(onClick = {
-                    coroutineScope.launch(Dispatchers.IO) {
+                    coroutineScope.launch(MultifsDispatcher()) {
                         file.remove()
+                        modifyChildren {
+                            removeAll { it == file }
+                        }
                     }
-                    showDialog.value = false
+                    showDialog = false
                 }) { Text("sure!") }
             },
             modifier = Modifier.wrapContentSize(),
@@ -115,5 +131,5 @@ fun RemoveFile(file: File) {
             }
         )
     }
-    Icon(Icons.Default.Delete, null, modifier = Modifier.clickable { showDialog.value = true })
+    Icon(Icons.Default.Delete, null, modifier = Modifier.clickable { showDialog = true })
 }

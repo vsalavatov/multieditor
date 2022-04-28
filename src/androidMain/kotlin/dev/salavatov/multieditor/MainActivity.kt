@@ -73,7 +73,7 @@ class MainActivity : ComponentActivity() {
                 listPermissionsNeeded.add(p)
             }
         }
-        if (!listPermissionsNeeded.isEmpty()) {
+        if (listPermissionsNeeded.isNotEmpty()) {
             ActivityCompat.requestPermissions(this, listPermissionsNeeded.toTypedArray(), 100)
             return false
         }

@@ -8,7 +8,8 @@ import dev.salavatov.multieditor.NamedStorageFactory
 class AppState(
     val editor: EditorState,
     val navigation: NavigationState
-)
+) {
+}
 
 @Composable
 fun makeStartAppState(storages: List<NamedStorageFactory>): AppState {
@@ -20,7 +21,6 @@ fun makeStartAppState(storages: List<NamedStorageFactory>): AppState {
                 mutableStateOf(false)
             ),
             NavigationState(
-                mutableStateOf(emptyList()),
                 mutableStateOf(storages)
             )
         )

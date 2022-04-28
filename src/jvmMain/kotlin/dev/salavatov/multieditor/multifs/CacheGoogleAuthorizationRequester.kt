@@ -31,7 +31,7 @@ class CacheGoogleAuthorizationRequester(val actualAuthorizationRequester: Google
         return actualAuthorizationRequester.refreshAuthorization(expired).also {
             Paths.get(".secret/tokens").writeText(Json.encodeToString(it.let {
                 if (it.refreshToken == null) {
-                    return GoogleAuthTokens(it.accessToken, it.expiresIn, expired.refreshToken)
+                    return GoogleAuthTokens(it.accessToken, expired.refreshToken)
                 }
                 it
             }))

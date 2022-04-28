@@ -1,6 +1,5 @@
 package dev.salavatov.multieditor
 
-import android.util.Log
 import dev.salavatov.multifs.cloud.googledrive.GoogleDriveAPI
 import dev.salavatov.multifs.cloud.googledrive.GoogleDriveFS
 import dev.salavatov.multifs.cloud.googledrive.IntentGoogleAuthorizationRequester
@@ -8,7 +7,6 @@ import dev.salavatov.multifs.sqlite.SqliteFS
 import dev.salavatov.multifs.sqlite.SqliteFSDatabaseHelper
 import dev.salavatov.multifs.systemfs.SystemFS
 import java.nio.file.Path
-import kotlin.io.path.pathString
 
 
 class Storages(
@@ -22,7 +20,9 @@ class Storages(
 
     private val googleDrive = NamedStorageFactory("Google Drive") {
         val gapi = GoogleDriveAPI(googleAuth)
-        GoogleDriveFS(gapi)
+        GoogleDriveFS(gapi).also {
+            it.root.listFolder() // trigger auth
+        }
     }
 
     private val systemFS = NamedStorageFactory("Local") {
@@ -31,8 +31,8 @@ class Storages(
 
     fun asList(): List<NamedStorageFactory> {
         return listOf(
-//            googleDrive,
-//            sqlite,
+            googleDrive,
+            sqlite,
             systemFS
         )
     }
