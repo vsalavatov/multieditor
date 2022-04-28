@@ -2,11 +2,10 @@ package dev.salavatov.multieditor.ui
 
 import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
-import dev.salavatov.multieditor.expect.MultifsDispatcher
+import dev.salavatov.multieditor.state.AppState
 import dev.salavatov.multifs.vfs.File
 import dev.salavatov.multifs.vfs.Folder
 import dev.salavatov.multifs.vfs.VFSNode
-import kotlinx.coroutines.launch
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Span
@@ -24,7 +23,7 @@ object NodeActions : StyleSheet() {
 
     val deleteNode by style {
         self + after style {
-            property("content", "\"♲\"")
+            property("content", "\"⨯\"")
             display(DisplayStyle.InlineBlock)
             marginLeft(5.px)
         }
@@ -32,8 +31,8 @@ object NodeActions : StyleSheet() {
 }
 
 @Composable
-fun AddNode(folder: Folder, modifyChildren: (SnapshotStateList<VFSNode>.() -> Unit) -> Unit) {
-    val coroutineScope = rememberCoroutineScope()
+fun AddNode(appState: AppState, folder: Folder, modifyChildren: (SnapshotStateList<VFSNode>.() -> Unit) -> Unit) {
+    val scope = rememberCoroutineScope()
     var showDialog: Boolean by remember { mutableStateOf(false) }
     var filename by remember { mutableStateOf("") }
 
@@ -55,10 +54,12 @@ fun AddNode(folder: Folder, modifyChildren: (SnapshotStateList<VFSNode>.() -> Un
                     SpanButton({
                         val fname = filename
                         if (fname != "") {
-                            coroutineScope.launch(MultifsDispatcher()) {
-                                val file = folder.createFile(fname)
-                                modifyChildren {
-                                    add(file)
+                            with(appState) {
+                                scope.launchSafe {
+                                    val file = folder.createFile(fname)
+                                    modifyChildren {
+                                        add(file)
+                                    }
                                 }
                             }
                             showDialog = false
@@ -67,10 +68,12 @@ fun AddNode(folder: Folder, modifyChildren: (SnapshotStateList<VFSNode>.() -> Un
                     SpanButton({
                         val fname = filename
                         if (fname != "") {
-                            coroutineScope.launch(MultifsDispatcher()) {
-                                val f = folder.createFolder(fname)
-                                modifyChildren {
-                                    add(f)
+                            with (appState) {
+                                scope.launchSafe {
+                                    val f = folder.createFolder(fname)
+                                    modifyChildren {
+                                        add(f)
+                                    }
                                 }
                             }
                             showDialog = false
@@ -88,8 +91,8 @@ fun AddNode(folder: Folder, modifyChildren: (SnapshotStateList<VFSNode>.() -> Un
 }
 
 @Composable
-fun RemoveFolder(folder: Folder, modifyChildren: (SnapshotStateList<VFSNode>.() -> Unit) -> Unit) {
-    val coroutineScope = rememberCoroutineScope()
+fun RemoveFolder(appState: AppState, folder: Folder, modifyChildren: (SnapshotStateList<VFSNode>.() -> Unit) -> Unit) {
+    val scope = rememberCoroutineScope()
     var showDialog by remember { mutableStateOf(false) }
     if (showDialog) {
         ModalDialog(
@@ -100,10 +103,12 @@ fun RemoveFolder(folder: Folder, modifyChildren: (SnapshotStateList<VFSNode>.() 
             content = {
                 Div { Text("are you sure you want to remove ${folder.name}?") }
                 SpanButton({
-                    coroutineScope.launch(MultifsDispatcher()) {
-                        folder.remove()
-                        modifyChildren {
-                            removeAll { it == folder }
+                    with (appState) {
+                        scope.launchSafe {
+                            folder.remove()
+                            modifyChildren {
+                                removeAll { it == folder }
+                            }
                         }
                     }
                     showDialog = false
@@ -118,8 +123,8 @@ fun RemoveFolder(folder: Folder, modifyChildren: (SnapshotStateList<VFSNode>.() 
 }
 
 @Composable
-fun RemoveFile(file: File, modifyChildren: (SnapshotStateList<VFSNode>.() -> Unit) -> Unit) {
-    val coroutineScope = rememberCoroutineScope()
+fun RemoveFile(appState: AppState, file: File, modifyChildren: (SnapshotStateList<VFSNode>.() -> Unit) -> Unit) {
+    val scope = rememberCoroutineScope()
     var showDialog by remember { mutableStateOf(false) }
     if (showDialog) {
         ModalDialog(
@@ -130,10 +135,12 @@ fun RemoveFile(file: File, modifyChildren: (SnapshotStateList<VFSNode>.() -> Uni
             content = {
                 Div { Text("are you sure you want to remove ${file.name}?") }
                 SpanButton({
-                    coroutineScope.launch(MultifsDispatcher()) {
-                        file.remove()
-                        modifyChildren {
-                            removeAll { it == file }
+                    with(appState) {
+                        scope.launchSafe {
+                            file.remove()
+                            modifyChildren {
+                                removeAll { it == file }
+                            }
                         }
                     }
                     showDialog = false

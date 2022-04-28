@@ -4,11 +4,17 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.key.*
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.isCtrlPressed
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.unit.dp
 import dev.salavatov.multieditor.state.AppState
 
@@ -20,7 +26,7 @@ fun EditorPane(appState: AppState, modifier: Modifier = Modifier) {
 
     Column(modifier = modifier.then(Modifier.fillMaxSize(1.0f)).onPreviewKeyEvent {
         if (it.isCtrlPressed && it.key == Key.S) {
-            with(appState.editor) { coroutineScope.launchSaveContent() }
+            with(appState) { coroutineScope.launchSaveContent() }
             true
         } else {
             false
@@ -29,7 +35,7 @@ fun EditorPane(appState: AppState, modifier: Modifier = Modifier) {
         Row(modifier = Modifier.fillMaxWidth(1f).wrapContentHeight()) {
             Text(editorState.file?.name ?: "", modifier = Modifier.fillMaxWidth(0.5f).padding(10.dp))
             Button(
-                onClick = { with(appState.editor) { coroutineScope.launchSaveContent() } }
+                onClick = { with(appState) { coroutineScope.launchSaveContent() } }
             ) { Text("save") }
             Text(
                 if (editorState.saving) {

@@ -14,16 +14,14 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dev.salavatov.multieditor.expect.AlertDialog
-import dev.salavatov.multieditor.expect.MultifsDispatcher
+import dev.salavatov.multieditor.state.AppState
 import dev.salavatov.multifs.vfs.File
 import dev.salavatov.multifs.vfs.Folder
 import dev.salavatov.multifs.vfs.VFSNode
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 @Composable
-fun AddNode(folder: Folder, modifyChildren: (SnapshotStateList<VFSNode>.() -> Unit) -> Unit) {
-    val coroutineScope = rememberCoroutineScope()
+fun AddNode(appState: AppState, folder: Folder, modifyChildren: (SnapshotStateList<VFSNode>.() -> Unit) -> Unit) {
+    val scope = rememberCoroutineScope()
     var showDialog: Boolean by remember { mutableStateOf(false) }
     var filename by remember { mutableStateOf("") }
 
@@ -36,10 +34,12 @@ fun AddNode(folder: Folder, modifyChildren: (SnapshotStateList<VFSNode>.() -> Un
                 Button(onClick = {
                     val fname = filename
                     if (fname != "") {
-                        coroutineScope.launch(Dispatchers.IO) {
-                            val f = folder.createFile(fname)
-                            modifyChildren {
-                                add(f)
+                        with(appState) {
+                            scope.launchSafe {
+                                val f = folder.createFile(fname)
+                                modifyChildren {
+                                    add(f)
+                                }
                             }
                         }
                         showDialog = false
@@ -49,10 +49,12 @@ fun AddNode(folder: Folder, modifyChildren: (SnapshotStateList<VFSNode>.() -> Un
                 Button(onClick = {
                     val fname = filename
                     if (fname != "") {
-                        coroutineScope.launch(MultifsDispatcher()) {
-                            val f = folder.createFolder(fname)
-                            modifyChildren {
-                                add(f)
+                        with(appState) {
+                            scope.launchSafe {
+                                val f = folder.createFolder(fname)
+                                modifyChildren {
+                                    add(f)
+                                }
                             }
                         }
                         showDialog = false
@@ -75,8 +77,8 @@ fun AddNode(folder: Folder, modifyChildren: (SnapshotStateList<VFSNode>.() -> Un
 }
 
 @Composable
-fun RemoveFolder(folder: Folder, modifyChildren: (SnapshotStateList<VFSNode>.() -> Unit) -> Unit) {
-    val coroutineScope = rememberCoroutineScope()
+fun RemoveFolder(appState: AppState, folder: Folder, modifyChildren: (SnapshotStateList<VFSNode>.() -> Unit) -> Unit) {
+    val scope = rememberCoroutineScope()
     var showDialog by remember { mutableStateOf(false) }
     if (showDialog) {
         AlertDialog(
@@ -85,10 +87,12 @@ fun RemoveFolder(folder: Folder, modifyChildren: (SnapshotStateList<VFSNode>.() 
             },
             buttons = {
                 Button(onClick = {
-                    coroutineScope.launch(MultifsDispatcher()) {
-                        folder.remove()
-                        modifyChildren {
-                            removeAll { it == folder }
+                    with(appState) {
+                        scope.launchSafe {
+                            folder.remove()
+                            modifyChildren {
+                                removeAll { it == folder }
+                            }
                         }
                     }
                     showDialog = false
@@ -105,8 +109,8 @@ fun RemoveFolder(folder: Folder, modifyChildren: (SnapshotStateList<VFSNode>.() 
 }
 
 @Composable
-fun RemoveFile(file: File, modifyChildren: (SnapshotStateList<VFSNode>.() -> Unit) -> Unit) {
-    val coroutineScope = rememberCoroutineScope()
+fun RemoveFile(appState: AppState, file: File, modifyChildren: (SnapshotStateList<VFSNode>.() -> Unit) -> Unit) {
+    val scope = rememberCoroutineScope()
     var showDialog by remember { mutableStateOf(false) }
     if (showDialog) {
         AlertDialog(
@@ -115,10 +119,12 @@ fun RemoveFile(file: File, modifyChildren: (SnapshotStateList<VFSNode>.() -> Uni
             },
             buttons = {
                 Button(onClick = {
-                    coroutineScope.launch(MultifsDispatcher()) {
-                        file.remove()
-                        modifyChildren {
-                            removeAll { it == file }
+                    with(appState) {
+                        scope.launchSafe {
+                            file.remove()
+                            modifyChildren {
+                                removeAll { it == file }
+                            }
                         }
                     }
                     showDialog = false

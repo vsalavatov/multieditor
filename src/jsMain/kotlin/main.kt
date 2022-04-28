@@ -8,11 +8,13 @@ import org.jetbrains.compose.web.renderComposable
 
 @Composable
 fun mountStyles() {
+    Style(AppStyle)
     Style(ExpandableStyle)
     Style(NavigatorPaneStyle)
     Style(ModalDialogStyle)
     Style(ButtonStyle)
     Style(NodeActions)
+    Style(ErrorPaneStyle)
 }
 
 fun main() {

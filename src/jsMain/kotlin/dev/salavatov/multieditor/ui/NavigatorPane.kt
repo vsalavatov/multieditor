@@ -6,7 +6,6 @@ import dev.salavatov.multieditor.NamedStorageFactory
 import dev.salavatov.multieditor.Storage
 import dev.salavatov.multieditor.expect.MultifsDispatcher
 import dev.salavatov.multieditor.state.AppState
-import dev.salavatov.multieditor.state.EditorState
 import dev.salavatov.multifs.vfs.File
 import dev.salavatov.multifs.vfs.Folder
 import dev.salavatov.multifs.vfs.VFSNode
@@ -46,15 +45,15 @@ fun NavigatorPane(appState: AppState) {
             }
         }) {
             StorageTreeView(
+                appState,
                 namedStorageFactory,
-                appState.editor,
             )
         }
     }
 }
 
 @Composable
-fun StorageTreeView(namedStorageFactory: NamedStorageFactory, editorState: EditorState): Unit =
+fun StorageTreeView(appState: AppState, namedStorageFactory: NamedStorageFactory): Unit =
     Div({
         style {
             position(Position.Relative)
@@ -86,16 +85,16 @@ fun StorageTreeView(namedStorageFactory: NamedStorageFactory, editorState: Edito
             }
 
             LaunchedEffect(key1 = Unit) {
-                scope.launch(MultifsDispatcher()) {
-                    childrenState.addAll(root.listFolder())
+                with(appState) {
+                    scope.launchFolderList(root, childrenState)
                 }
             }
 
             Expandable({
                 Text(name)
             }) {
-                AddNode(root, modifyChildren)
-                FolderContentView(childrenState, editorState, modifyChildren)
+                AddNode(appState, root, modifyChildren)
+                FolderContentView(appState, childrenState, modifyChildren)
             }
         }
     }
@@ -103,8 +102,8 @@ fun StorageTreeView(namedStorageFactory: NamedStorageFactory, editorState: Edito
 
 @Composable
 fun FolderContentView(
+    appState: AppState,
     children: SnapshotStateList<VFSNode>,
-    editorState: EditorState,
     modifyChildren: (SnapshotStateList<VFSNode>.() -> Unit) -> Unit
 ): Unit =
     Div({
@@ -126,10 +125,10 @@ fun FolderContentView(
             children.forEach { node ->
                 when (node) {
                     is Folder -> {
-                        FolderView(node, editorState, modifyChildren)
+                        FolderView(appState, node, modifyChildren)
                     }
                     is File -> {
-                        FileView(node, editorState, modifyChildren)
+                        FileView(appState, node, modifyChildren)
                     }
                 }
             }
@@ -139,8 +138,10 @@ fun FolderContentView(
 
 @Composable
 private fun FileView(
-    file: File, editorState: EditorState, modifyChildren: (SnapshotStateList<VFSNode>.() -> Unit) -> Unit
-): Unit {
+    appState: AppState,
+    file: File,
+    modifyChildren: (SnapshotStateList<VFSNode>.() -> Unit) -> Unit
+) {
     val scope = rememberCoroutineScope()
     Div({
         style {
@@ -152,19 +153,19 @@ private fun FileView(
     }) {
         Span({
             onClick {
-                with(editorState) { scope.launchFileOpen(file) }
+                with(appState) { scope.launchFileOpen(file) }
             }
             classes(NavigatorPaneStyle.fileIcon)
         }) { Text(file.name) }
-        RemoveFile(file, modifyChildren)
+        RemoveFile(appState, file, modifyChildren)
     }
 }
 
 
 @Composable
 fun FolderView(
+    appState: AppState,
     folder: Folder,
-    editorState: EditorState,
     modifyParentChildren: (SnapshotStateList<VFSNode>.() -> Unit) -> Unit
 ): Unit = Div({
     style {
@@ -174,10 +175,10 @@ fun FolderView(
         padding(3.px)
     }
 }) {
-    val coroutineScope = rememberCoroutineScope()
+    val scope = rememberCoroutineScope()
     val childrenState = remember { mutableStateListOf<VFSNode>() }
 
-    val modifyChildren : (SnapshotStateList<VFSNode>.() -> Unit) -> Unit = { block ->
+    val modifyChildren: (SnapshotStateList<VFSNode>.() -> Unit) -> Unit = { block ->
         childrenState.block()
     }
 
@@ -185,11 +186,13 @@ fun FolderView(
         Text(folder.name)
     }, {
         LaunchedEffect(key1 = Unit) {
-            coroutineScope.launch(MultifsDispatcher()) { childrenState.addAll(folder.listFolder()) }
+            with(appState) {
+                scope.launchFolderList(folder, childrenState)
+            }
         }
 
-        RemoveFolder(folder, modifyParentChildren)
-        AddNode(folder, modifyChildren)
-        FolderContentView(childrenState, editorState, modifyChildren)
+        RemoveFolder(appState, folder, modifyParentChildren)
+        AddNode(appState, folder, modifyChildren)
+        FolderContentView(appState, childrenState, modifyChildren)
     })
 }

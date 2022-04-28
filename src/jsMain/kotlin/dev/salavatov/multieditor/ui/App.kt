@@ -6,6 +6,12 @@ import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.css.keywords.auto
 import org.jetbrains.compose.web.dom.Div
 
+object AppStyle : StyleSheet() {
+    val main by style {
+        fontSize(1.2.em)
+    }
+}
+
 @Composable
 fun AppUI(appState: AppState) {
     Div(attrs = {
@@ -13,8 +19,9 @@ fun AppUI(appState: AppState) {
             height(100.percent)
             width(100.percent)
         }
+        classes(AppStyle.main)
     }) {
-
+        ErrorPane(appState)
         Div({
             style {
                 display(DisplayStyle.InlineBlock)

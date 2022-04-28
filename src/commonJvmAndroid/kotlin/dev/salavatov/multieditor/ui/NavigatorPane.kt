@@ -15,18 +15,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dev.salavatov.multieditor.NamedStorageFactory
 import dev.salavatov.multieditor.Storage
-import dev.salavatov.multieditor.expect.MultifsDispatcher
 import dev.salavatov.multieditor.state.AppState
-import dev.salavatov.multieditor.state.EditorState
 import dev.salavatov.multifs.vfs.File
 import dev.salavatov.multifs.vfs.Folder
 import dev.salavatov.multifs.vfs.VFSNode
-import kotlinx.coroutines.launch
 
 @Composable
 fun FolderContentView(
+    appState: AppState,
     children: SnapshotStateList<VFSNode>,
-    editorState: EditorState,
     modifyChildren: (SnapshotStateList<VFSNode>.() -> Unit) -> Unit
 ): Unit = Row(
     modifier = Modifier.wrapContentHeight().fillMaxWidth()
@@ -35,10 +32,10 @@ fun FolderContentView(
         for (node in children) {
             when (node) {
                 is Folder -> {
-                    FolderView(node, editorState, modifyChildren)
+                    FolderView(appState, node, modifyChildren)
                 }
                 is File -> {
-                    FileView(node, editorState, modifyChildren)
+                    FileView(appState, node, modifyChildren)
                 }
             }
         }
@@ -47,28 +44,28 @@ fun FolderContentView(
 
 @Composable
 private fun FileView(
-    file: File, editorState: EditorState,
+    appState: AppState, file: File,
     modifyChildren: (SnapshotStateList<VFSNode>.() -> Unit) -> Unit
 ) {
     val scope = rememberCoroutineScope()
     Row(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
         Icon(Icons.Default.Edit, contentDescription = null, tint = LocalContentColor.current)
         Text(file.name, modifier = Modifier.clickable {
-            with(editorState) { scope.launchFileOpen(file) }
+            with(appState) { scope.launchFileOpen(file) }
         })
-        RemoveFile(file, modifyChildren)
+        RemoveFile(appState, file, modifyChildren)
     }
 }
 
 
 @Composable
 fun FolderView(
-    folder: Folder, editorState: EditorState,
+    appState: AppState, folder: Folder,
     modifyParentChildren: (SnapshotStateList<VFSNode>.() -> Unit) -> Unit
 ) = Row(
     modifier = Modifier.wrapContentHeight().fillMaxWidth().padding(vertical = 1.dp)
 ) {
-    val coroutineScope = rememberCoroutineScope()
+    val scope = rememberCoroutineScope()
     val children = remember { mutableStateListOf<VFSNode>() }
     val modifyChildren: (SnapshotStateList<VFSNode>.() -> Unit) -> Unit = { block ->
         children.block()
@@ -76,31 +73,32 @@ fun FolderView(
 
     Expandable({
         Text(folder.name)
-        AddNode(folder, modifyChildren)
-        RemoveFolder(folder, modifyParentChildren)
+        AddNode(appState, folder, modifyChildren)
+        RemoveFolder(appState, folder, modifyParentChildren)
     }, {
         LaunchedEffect(key1 = Unit) {
-            coroutineScope.launch(MultifsDispatcher()) { children.addAll(folder.listFolder()) }
+            with(appState) {
+                scope.launchFolderList(folder, children)
+            }
         }
-        FolderContentView(children, editorState, modifyChildren)
+        FolderContentView(appState, children, modifyChildren)
     })
 }
 
 
 @Composable
-fun StorageTreeView(namedStorageFactory: NamedStorageFactory, editorState: EditorState, modifier: Modifier = Modifier) =
+fun StorageTreeView(appState: AppState, namedStorageFactory: NamedStorageFactory, modifier: Modifier = Modifier) =
     Column(
         modifier = modifier.then(Modifier.wrapContentHeight().fillMaxWidth().padding(10.dp, 3.dp))
     ) {
         val scope = rememberCoroutineScope()
         val name = remember { namedStorageFactory.name }
-        var storage by remember { mutableStateOf<Storage?>(null) }
+        val storageState = remember { mutableStateOf<Storage?>(null) }
+        var storage by storageState
 
         if (storage == null) {
             Row(modifier = Modifier.clickable {
-                scope.launch(MultifsDispatcher()) {
-                    storage = namedStorageFactory.init()
-                }
+                with(appState) { scope.launchSafe { storage = namedStorageFactory.init() } }
             }) {
                 Icon(Icons.Default.Add, null)
                 Text(name)
@@ -113,14 +111,16 @@ fun StorageTreeView(namedStorageFactory: NamedStorageFactory, editorState: Edito
             }
 
             LaunchedEffect(key1 = Unit) {
-                scope.launch(MultifsDispatcher()) { children.addAll(root.listFolder()) }
+                with(appState) {
+                    scope.launchFolderList(root, children)
+                }
             }
 
             Expandable({
                 Text(name)
-                AddNode(root, modifyChildren)
+                AddNode(appState, root, modifyChildren)
             }, {
-                FolderContentView(children, editorState, modifyChildren)
+                FolderContentView(appState, children, modifyChildren)
             })
         }
     }
@@ -137,8 +137,8 @@ fun NavigatorPane(appState: AppState, modifier: Modifier = Modifier) {
             LazyColumn(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
                 items(availableBackends.size) { index ->
                     StorageTreeView(
+                        appState,
                         availableBackends[index],
-                        appState.editor,
                         modifier = Modifier.wrapContentHeight().fillMaxWidth().padding(1.dp)
                     )
                 }

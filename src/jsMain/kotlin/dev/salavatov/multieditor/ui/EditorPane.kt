@@ -26,7 +26,7 @@ fun EditorPane(appState: AppState) {
         Div {
             Button({
                 onClick {
-                    with(appState.editor) { coroutineScope.launchSaveContent() }
+                    with(appState) { coroutineScope.launchSaveContent() }
                 }
             }) {
                 Text("save")
