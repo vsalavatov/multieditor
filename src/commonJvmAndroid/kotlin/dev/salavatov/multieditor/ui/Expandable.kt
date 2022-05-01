@@ -16,7 +16,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 
 @Composable
-fun Expandable(preview: @Composable () -> Unit, content: @Composable () -> Unit) {
+fun Expandable(
+    preview: @Composable () -> Unit,
+    content: @Composable () -> Unit,
+    onExpand: () -> Unit = {},
+    onCollapse: () -> Unit = {}
+) {
     val expanded = remember { mutableStateOf(false) }
     return Column(
         modifier = Modifier
@@ -28,7 +33,13 @@ fun Expandable(preview: @Composable () -> Unit, content: @Composable () -> Unit)
                 .wrapContentHeight()
                 .fillMaxWidth()
                 .clickable {
-                    expanded.value = expanded.value.xor(true)
+                    if (expanded.value) {
+                        onCollapse()
+                        expanded.value = false
+                    } else {
+                        onExpand()
+                        expanded.value = true
+                    }
                 }
         )
         {

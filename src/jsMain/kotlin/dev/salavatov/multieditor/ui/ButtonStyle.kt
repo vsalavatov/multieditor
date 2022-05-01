@@ -2,7 +2,9 @@ package dev.salavatov.multieditor.ui
 
 import androidx.compose.runtime.Composable
 import org.jetbrains.compose.web.css.*
+import org.jetbrains.compose.web.dom.AttrBuilderContext
 import org.jetbrains.compose.web.dom.Span
+import org.w3c.dom.HTMLSpanElement
 
 object ButtonStyle : StyleSheet() {
     val button by style {
@@ -20,8 +22,9 @@ object ButtonStyle : StyleSheet() {
 }
 
 @Composable
-fun SpanButton(onClick: () -> Unit, content: @Composable () -> Unit) =
+fun SpanButton(onClick: () -> Unit, attrs: AttrBuilderContext<HTMLSpanElement> = {}, content: @Composable () -> Unit) =
     Span({
         onClick { onClick() }
         classes(ButtonStyle.button)
+        attrs()
     }) { content() }

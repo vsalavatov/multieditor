@@ -23,26 +23,46 @@ fun EditorPane(appState: AppState) {
             display(DisplayStyle.InlineBlock)
         }
     }) {
-        Div {
-            Button({
-                onClick {
-                    with(appState) { coroutineScope.launchSaveContent() }
+        editorState.fileState.value?.let {
+            Div {
+                Span({ style { paddingLeft(10.px); paddingRight(60.px) } }) {
+                    Text(
+                        it.name
+                    )
                 }
-            }) {
-                Text("save")
+                Button({
+                    onClick {
+                        with(appState) { coroutineScope.launchSaveContent() }
+                    }
+                }) {
+                    Text("save")
+                }
+                Text(
+                    if (editorState.savingState.value) {
+                        "saving..."
+                    } else {
+                        ""
+                    }
+                )
             }
-            Span({ style { paddingLeft(10.px); paddingRight(10.px) } }) { Text(editorState.fileState.value?.name ?: "") }
-            Text(
-                if (editorState.savingState.value) {
-                    "saving..."
-                } else {
-                    ""
-                }
-            )
         }
         Div({
             style {
                 marginTop(10.px)
+                property("border-top", "2px solid gray")
+//                border {
+//                    width = 1.px
+//                    style = LineStyle.Solid
+//                    color = Color.gray
+//                }
+                width(100.percent)
+                position(Position.Absolute)
+            }
+        }) {}
+        Div({
+            style {
+                marginTop(10.px)
+                marginLeft(10.px)
             }
         }) {
             TextArea(editorState.content) {
@@ -52,8 +72,6 @@ fun EditorPane(appState: AppState) {
                 }
                 placeholder("content...")
                 style {
-                    display(DisplayStyle.Block)
-                    position(Position.Absolute)
                     width(85.percent)
                     height(93.percent)
                     property("resize", "none")

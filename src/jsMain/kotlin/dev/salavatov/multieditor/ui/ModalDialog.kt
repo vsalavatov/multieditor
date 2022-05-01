@@ -17,20 +17,21 @@ object ModalDialogStyle : StyleSheet() {
         property("top", 0)
         width(100.percent)
         height(100.percent)
-        property("overflow", "auto")
+        property("overflow", "hidden")
         backgroundColor(rgba(0, 0, 0, 0.5))
     }
 
     val modalContent by style {
         backgroundColor(Color.white)
-        property("margin", "25% auto")
-        padding(20.px)
+        property("margin", "auto")
+        property("margin-top", "5%")
+        property("margin-bottom", "5%")
         border {
             width = 1.px
             style = LineStyle.Solid
             color = Color.darkgray
         }
-        width(80.percent)
+        width(50.percent)
     }
 
     val modalHeader by style {
@@ -40,7 +41,7 @@ object ModalDialogStyle : StyleSheet() {
     }
 
     val modalBody by style {
-        padding(2.px, 16.px)
+        margin(2.px, 16.px)
     }
 
     val close by style {

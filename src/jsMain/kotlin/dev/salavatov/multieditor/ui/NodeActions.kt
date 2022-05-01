@@ -1,16 +1,12 @@
 package dev.salavatov.multieditor.ui
 
 import androidx.compose.runtime.*
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import dev.salavatov.multieditor.state.AppState
-import dev.salavatov.multifs.vfs.File
-import dev.salavatov.multifs.vfs.Folder
-import dev.salavatov.multifs.vfs.VFSNode
+import dev.salavatov.multieditor.state.FileNode
+import dev.salavatov.multieditor.state.FileTree
+import dev.salavatov.multieditor.state.FolderNode
 import org.jetbrains.compose.web.css.*
-import org.jetbrains.compose.web.dom.Div
-import org.jetbrains.compose.web.dom.Span
-import org.jetbrains.compose.web.dom.Text
-import org.jetbrains.compose.web.dom.TextArea
+import org.jetbrains.compose.web.dom.*
 
 object NodeActions : StyleSheet() {
     val addNode by style {
@@ -28,10 +24,41 @@ object NodeActions : StyleSheet() {
             marginLeft(5.px)
         }
     }
+
+    val moveCopyFile by style {
+        self + after style {
+            property("content", "\"\uF1E0\"")
+            display(DisplayStyle.InlineBlock)
+            marginLeft(5.px)
+        }
+    }
+
+    val moveCopyElem by style {
+        padding(2.px)
+        self + hover style {
+            backgroundColor(Color.lightgray)
+        }
+    }
+
+    val refresh by style {
+        self + before style {
+            property("content", "\"↺\"")
+            display(DisplayStyle.InlineBlock)
+            marginRight(5.px)
+        }
+    }
+
+    val back by style {
+        self + before style {
+            property("content", "\"←\"")
+            display(DisplayStyle.InlineBlock)
+            marginRight(5.px)
+        }
+    }
 }
 
 @Composable
-fun AddNode(appState: AppState, folder: Folder, modifyChildren: (SnapshotStateList<VFSNode>.() -> Unit) -> Unit) {
+fun AddNode(appState: AppState, folder: FolderNode) {
     val scope = rememberCoroutineScope()
     var showDialog: Boolean by remember { mutableStateOf(false) }
     var filename by remember { mutableStateOf("") }
@@ -55,12 +82,7 @@ fun AddNode(appState: AppState, folder: Folder, modifyChildren: (SnapshotStateLi
                         val fname = filename
                         if (fname != "") {
                             with(appState) {
-                                scope.launchSafe {
-                                    val file = folder.createFile(fname)
-                                    modifyChildren {
-                                        add(file)
-                                    }
-                                }
+                                scope.launchCreateFileInFolder(folder, fname)
                             }
                             showDialog = false
                         }
@@ -68,13 +90,8 @@ fun AddNode(appState: AppState, folder: Folder, modifyChildren: (SnapshotStateLi
                     SpanButton({
                         val fname = filename
                         if (fname != "") {
-                            with (appState) {
-                                scope.launchSafe {
-                                    val f = folder.createFolder(fname)
-                                    modifyChildren {
-                                        add(f)
-                                    }
-                                }
+                            with(appState) {
+                                scope.launchCreateFolderInFolder(folder, fname)
                             }
                             showDialog = false
                         }
@@ -91,7 +108,7 @@ fun AddNode(appState: AppState, folder: Folder, modifyChildren: (SnapshotStateLi
 }
 
 @Composable
-fun RemoveFolder(appState: AppState, folder: Folder, modifyChildren: (SnapshotStateList<VFSNode>.() -> Unit) -> Unit) {
+fun RemoveFolder(appState: AppState, folder: FolderNode) {
     val scope = rememberCoroutineScope()
     var showDialog by remember { mutableStateOf(false) }
     if (showDialog) {
@@ -101,15 +118,10 @@ fun RemoveFolder(appState: AppState, folder: Folder, modifyChildren: (SnapshotSt
             },
             title = { Text("folder remove") },
             content = {
-                Div { Text("are you sure you want to remove ${folder.name}?") }
+                Div { Text("are you sure you want to remove ${folder.folder.name}?") }
                 SpanButton({
-                    with (appState) {
-                        scope.launchSafe {
-                            folder.remove()
-                            modifyChildren {
-                                removeAll { it == folder }
-                            }
-                        }
+                    with(appState) {
+                        scope.launchRemoveFolder(folder)
                     }
                     showDialog = false
                 }) { Text("sure!") }
@@ -123,7 +135,7 @@ fun RemoveFolder(appState: AppState, folder: Folder, modifyChildren: (SnapshotSt
 }
 
 @Composable
-fun RemoveFile(appState: AppState, file: File, modifyChildren: (SnapshotStateList<VFSNode>.() -> Unit) -> Unit) {
+fun RemoveFile(appState: AppState, file: FileNode) {
     val scope = rememberCoroutineScope()
     var showDialog by remember { mutableStateOf(false) }
     if (showDialog) {
@@ -133,15 +145,10 @@ fun RemoveFile(appState: AppState, file: File, modifyChildren: (SnapshotStateLis
             },
             title = { Text("file remove") },
             content = {
-                Div { Text("are you sure you want to remove ${file.name}?") }
+                Div { Text("are you sure you want to remove ${file.file.name}?") }
                 SpanButton({
                     with(appState) {
-                        scope.launchSafe {
-                            file.remove()
-                            modifyChildren {
-                                removeAll { it == file }
-                            }
-                        }
+                        scope.launchRemoveFile(file)
                     }
                     showDialog = false
                 }) { Text("sure!") }
@@ -152,4 +159,127 @@ fun RemoveFile(appState: AppState, file: File, modifyChildren: (SnapshotStateLis
         onClick { showDialog = true }
         classes(NodeActions.deleteNode)
     }) {}
+}
+
+@Composable
+fun MoveCopyFile(appState: AppState, fileTree: FileTree, file: FileNode) {
+    val scope = rememberCoroutineScope()
+    var showDialog by remember { mutableStateOf(false) }
+    var targetFilename by remember { mutableStateOf(file.file.name) }
+    var overwriteFlag by remember { mutableStateOf(false) }
+    if (showDialog) {
+        var currentFolder by mutableStateOf(fileTree.root)
+        ModalDialog(
+            onDismissRequest = {
+                showDialog = false
+            },
+            title = { Text("move or copy file") },
+            content = {
+                LaunchedEffect(currentFolder) {
+                    with(appState) { scope.launchRenewFolderList(currentFolder) }
+                }
+                Div({
+                    style {
+                        padding(3.px)
+                        maxHeight(400.px)
+                        overflowY("scroll")
+                    }
+                }) {
+                    Div({
+                        classes(NodeActions.refresh, NodeActions.moveCopyElem)
+                    }) {}
+                    currentFolder.parent?.let { parent ->
+                        Div({
+                            onClick {
+                                currentFolder = parent
+                            }
+                            classes(NodeActions.back, NodeActions.moveCopyElem)
+                        }) {
+                            Text("..")
+                        }
+                    }
+                    currentFolder.children.forEach { node ->
+                        when (node) { // val node = currentFolder.children[index]
+                            is FileNode -> Div({
+                                onClick {
+                                    targetFilename = node.file.name
+                                }
+                                classes(NavigatorPaneStyle.fileIcon, NodeActions.moveCopyElem)
+                            }) {
+                                Text(node.file.name)
+                            }
+                            is FolderNode -> Div({
+                                onClick {
+                                    currentFolder = node
+                                }
+                                classes(NavigatorPaneStyle.folderIcon, NodeActions.moveCopyElem)
+                            }) {
+                                Text(node.folder.name)
+                            }
+                        }
+                    }
+                }
+
+                Div({
+                    style {
+                        padding(3.px)
+                    }
+                }) {
+                    Div {
+                        TextArea(targetFilename) {
+                            onInput { targetFilename = it.value }
+                            style {
+                                width(200.px)
+                            }
+                        }
+                    }
+                    Span {
+                        CheckboxInput(overwriteFlag) {
+                            onClick { overwriteFlag = !overwriteFlag }
+                            style {
+                                paddingRight(
+                                    15.px
+                                )
+                            }
+                        }
+                        Text("overwrite")
+                    }
+                    Span {
+                        SpanButton({
+                            with(appState) {
+                                scope.launchCopyFileToFolder(
+                                    fileTree,
+                                    file,
+                                    currentFolder,
+                                    targetFilename,
+                                    overwriteFlag
+                                )
+                                showDialog = false
+                            }
+                        }, attrs = {
+                            style {
+                                paddingRight(20.px)
+                            }
+                        }) { Text("copy") }
+                        SpanButton({
+                            with(appState) {
+                                scope.launchMoveFileToFolder(
+                                    fileTree,
+                                    file,
+                                    currentFolder,
+                                    targetFilename,
+                                    overwriteFlag
+                                )
+                                showDialog = false
+                            }
+                        }) { Text("move") }
+                    }
+                }
+            }
+        )
+    }
+    Span({
+        onClick { showDialog = true }
+        classes(NodeActions.moveCopyFile)
+    })
 }

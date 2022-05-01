@@ -27,6 +27,7 @@ fun AppUI(appState: AppState) {
                 display(DisplayStyle.InlineBlock)
                 height(100.percent)
                 maxWidth(30.percent)
+                marginRight(10.px)
             }
         }) {
             NavigatorPane(appState)
@@ -34,11 +35,13 @@ fun AppUI(appState: AppState) {
         Div({
             style {
                 display(DisplayStyle.InlineBlock)
-                border {
-                    width = 1.px
-                    style = LineStyle.Solid
-                    color = Color.gray
-                }
+                property("border-left", "2px solid gray")
+//                border {
+//                    width = 2.px
+//                    style = LineStyle.Solid
+//                    color = Color.gray
+//                }
+                marginLeft((-2).px)
                 height(100.percent)
                 position(Position.Absolute)
             }
@@ -46,7 +49,6 @@ fun AppUI(appState: AppState) {
         Div({
             style {
                 display(DisplayStyle.InlineBlock)
-                marginLeft(20.px)
                 height(100.percent)
                 width(auto)
                 property("vertical-align", "top")

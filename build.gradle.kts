@@ -143,16 +143,3 @@ project.extensions.findByType<KotlinMultiplatformExtension>()?.let { ext ->
         ).contains(sourceSet.name)
     }
 }
-
-// kotlin 1.6.20 isn't supported by compose 1.1.0
-// Suppress Compose Kotlin compiler compatibility warning
-//allprojects {
-//    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-//        kotlinOptions {
-//            freeCompilerArgs = freeCompilerArgs + listOf(
-//                "-P",
-//                "plugin:androidx.compose.compiler.plugins.kotlin:suppressKotlinVersionCompatibilityCheck=true"
-//            )
-//        }
-//    }
-//}

@@ -37,7 +37,12 @@ object ExpandableStyle : StyleSheet() {
 }
 
 @Composable
-fun Expandable(preview: @Composable () -> Unit, content: @Composable () -> Unit) {
+fun Expandable(
+    preview: @Composable () -> Unit,
+    content: @Composable () -> Unit,
+    onExpand: () -> Unit = {},
+    onCollapse: () -> Unit = {}
+) {
     var expanded by remember { mutableStateOf(false) }
     return Div({
         classes(
@@ -50,7 +55,13 @@ fun Expandable(preview: @Composable () -> Unit, content: @Composable () -> Unit)
     }) {
         Span({
             onClick {
-                expanded = expanded.xor(true)
+                if (expanded) {
+                    onCollapse()
+                    expanded = false
+                } else {
+                    onExpand()
+                    expanded = true
+                }
             }
         }) {
             preview()

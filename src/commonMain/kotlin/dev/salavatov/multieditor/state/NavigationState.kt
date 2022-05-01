@@ -1,12 +1,9 @@
 package dev.salavatov.multieditor.state
 
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import dev.salavatov.multieditor.NamedStorageFactory
 
 class NavigationState(
-    val availableStoragesState: MutableState<List<NamedStorageFactory>>
-) {
-    var availableStorages by availableStoragesState
-}
+    val availableStoragesState: SnapshotStateList<NamedStorageFactory>,
+    val configuredStoragesState: SnapshotStateList<FileTree>
+)

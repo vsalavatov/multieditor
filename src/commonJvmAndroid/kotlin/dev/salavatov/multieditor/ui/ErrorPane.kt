@@ -31,8 +31,10 @@ fun ErrorPane(appState: AppState) {
                 .wrapContentHeight()
                 .background(Color(255, 124, 128))
         ) {
-            Text("Error: ", fontWeight = FontWeight.Bold)
-            Text(it.toString())
+            Row(modifier = Modifier.fillMaxWidth(0.8f)) {
+                Text("Error: ", fontWeight = FontWeight.Bold)
+                Text(it.toString())
+            }
             Text(
                 "x",
                 fontSize = 1.5.em,
