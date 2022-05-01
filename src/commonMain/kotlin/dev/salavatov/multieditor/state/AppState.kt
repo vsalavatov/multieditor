@@ -5,6 +5,7 @@ import dev.salavatov.multieditor.NamedStorageFactory
 import dev.salavatov.multieditor.expect.MultifsDispatcher
 import dev.salavatov.multifs.vfs.File
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 
 class AppState(
@@ -12,8 +13,10 @@ class AppState(
     val navigation: NavigationState,
     val errorState: MutableState<Throwable?>
 ) {
-    fun CoroutineScope.launchSafe(block: suspend () -> Unit) =
-        launch(MultifsDispatcher()) {
+    val appScope = CoroutineScope(SupervisorJob() + MultifsDispatcher())
+
+    fun launchSafe(block: suspend () -> Unit) =
+        appScope.launch(MultifsDispatcher()) {
             try {
                 block()
             } catch (e: Exception) {
@@ -21,7 +24,7 @@ class AppState(
             }
         }
 
-    fun CoroutineScope.launchSaveContent() {
+    fun launchSaveContent() {
         val file = editor.fileState.value
         if (file != null && !editor.saving) {
             editor.saving = true
@@ -33,7 +36,7 @@ class AppState(
         }
     }
 
-    fun CoroutineScope.launchFileOpen(targetFile: File) =
+    fun launchFileOpen(targetFile: File) =
         launchSafe {
             val contentBytes = targetFile.read()
             if (!editor.saving) {
@@ -42,7 +45,7 @@ class AppState(
             }
         }
 
-    fun CoroutineScope.launchRenewFolderList(folder: FolderNode) =
+    fun launchRenewFolderList(folder: FolderNode) =
         launchSafe {
             val data = folder.folder.listFolder().map { it.toFileTreeNode(folder) }
             folder.children.retainAll(data)
@@ -51,7 +54,7 @@ class AppState(
             )
         }
 
-    fun CoroutineScope.launchInitializeStorage(namedStorageFactory: NamedStorageFactory) =
+    fun launchInitializeStorage(namedStorageFactory: NamedStorageFactory) =
         launchSafe {
             val fs = namedStorageFactory.init()
             val name = namedStorageFactory.name
@@ -65,19 +68,19 @@ class AppState(
             )
         }
 
-    fun CoroutineScope.launchCreateFileInFolder(folder: FolderNode, filename: String) =
+    fun launchCreateFileInFolder(folder: FolderNode, filename: String) =
         launchSafe {
             val f = folder.folder.createFile(filename)
             folder.children.add(f.toFileTreeNode(folder))
         }
 
-    fun CoroutineScope.launchCreateFolderInFolder(folder: FolderNode, foldername: String) =
+    fun launchCreateFolderInFolder(folder: FolderNode, foldername: String) =
         launchSafe {
             val f = folder.folder.createFolder(foldername)
             folder.children.add(f.toFileTreeNode(folder))
         }
 
-    fun CoroutineScope.launchRemoveFolder(folder: FolderNode) =
+    fun launchRemoveFolder(folder: FolderNode) =
         launchSafe {
             folder.folder.remove()
             folder.parent?.run {
@@ -85,7 +88,7 @@ class AppState(
             }
         }
 
-    fun CoroutineScope.launchRemoveFile(file: FileNode) =
+    fun launchRemoveFile(file: FileNode) =
         launchSafe {
             file.file.remove()
             file.parent?.run {
@@ -93,7 +96,7 @@ class AppState(
             }
         }
 
-    fun CoroutineScope.launchCopyFileToFolder(
+    fun launchCopyFileToFolder(
         fileTree: FileTree,
         file: FileNode,
         folder: FolderNode,
@@ -106,7 +109,7 @@ class AppState(
             launchRenewFolderList(folder)
         }
 
-    fun CoroutineScope.launchMoveFileToFolder(
+    fun launchMoveFileToFolder(
         fileTree: FileTree,
         file: FileNode,
         folder: FolderNode,

@@ -10,9 +10,7 @@ import androidx.compose.material.LocalContentColor
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowRight
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 
 @Composable
@@ -22,7 +20,7 @@ fun Expandable(
     onExpand: () -> Unit = {},
     onCollapse: () -> Unit = {}
 ) {
-    val expanded = remember { mutableStateOf(false) }
+    var expanded by remember { mutableStateOf(false) }
     return Column(
         modifier = Modifier
             .wrapContentHeight()
@@ -33,18 +31,17 @@ fun Expandable(
                 .wrapContentHeight()
                 .fillMaxWidth()
                 .clickable {
-                    if (expanded.value) {
+                    expanded = if (expanded) {
                         onCollapse()
-                        expanded.value = false
+                        false
                     } else {
                         onExpand()
-                        expanded.value = true
+                        true
                     }
                 }
-        )
-        {
+        ) {
             Icon(
-                if (expanded.value) {
+                if (expanded) {
                     Icons.Default.KeyboardArrowDown
                 } else {
                     Icons.Default.KeyboardArrowRight
@@ -52,7 +49,7 @@ fun Expandable(
             )
             preview()
         }
-        if (expanded.value) {
+        if (expanded) {
             content()
         }
     }

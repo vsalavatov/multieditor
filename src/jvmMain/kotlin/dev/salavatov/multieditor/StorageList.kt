@@ -10,7 +10,7 @@ import dev.salavatov.multifs.systemfs.SystemFS
 
 fun makeStorageList(): List<NamedStorageFactory> {
     val systemfs = NamedStorageFactory("Local device") { SystemFS() }
-    val gdfs = NamedStorageFactory("Google.Drive") {
+    val gdfs = NamedStorageFactory("Google Drive") {
         val googleAuth = CacheGoogleAuthorizationRequester(
             HttpCallbackGoogleAuthorizationRequester(
                 GoogleAppCredentials(

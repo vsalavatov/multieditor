@@ -55,12 +55,12 @@ fun Expandable(
     }) {
         Span({
             onClick {
-                if (expanded) {
+                expanded = if (expanded) {
                     onCollapse()
-                    expanded = false
+                    false
                 } else {
                     onExpand()
-                    expanded = true
+                    true
                 }
             }
         }) {

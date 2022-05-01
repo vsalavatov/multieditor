@@ -7,7 +7,6 @@ import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -21,12 +20,11 @@ import dev.salavatov.multieditor.state.AppState
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun EditorPane(appState: AppState, modifier: Modifier = Modifier) {
-    val coroutineScope = rememberCoroutineScope()
     val editorState = remember { appState.editor }
 
     Column(modifier = modifier.then(Modifier.fillMaxSize(1.0f)).onPreviewKeyEvent {
         if (it.isCtrlPressed && it.key == Key.S) {
-            with(appState) { coroutineScope.launchSaveContent() }
+            appState.launchSaveContent()
             true
         } else {
             false
@@ -35,7 +33,7 @@ fun EditorPane(appState: AppState, modifier: Modifier = Modifier) {
         Row(modifier = Modifier.fillMaxWidth(1f).wrapContentHeight()) {
             Text(editorState.file?.name ?: "", modifier = Modifier.fillMaxWidth(0.5f).padding(10.dp))
             Button(
-                onClick = { with(appState) { coroutineScope.launchSaveContent() } }
+                onClick = { appState.launchSaveContent() }
             ) { Text("save") }
             Text(
                 if (editorState.saving) {

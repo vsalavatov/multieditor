@@ -13,7 +13,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dev.salavatov.multieditor.state.AppState
@@ -23,8 +22,6 @@ import dev.salavatov.multieditor.state.FolderNode
 
 @Composable
 fun NavigatorPane(appState: AppState, modifier: Modifier = Modifier) {
-    val scope = rememberCoroutineScope()
-
     val availableStoragesState = remember { appState.navigation.availableStoragesState }
     val configuredStoragesState = remember { appState.navigation.configuredStoragesState }
 
@@ -35,9 +32,7 @@ fun NavigatorPane(appState: AppState, modifier: Modifier = Modifier) {
                     val storageFactory = availableStoragesState[index]
                     val name = storageFactory.name
                     Row(modifier = Modifier.clickable {
-                        with(appState) {
-                            scope.launchInitializeStorage(storageFactory)
-                        }
+                        appState.launchInitializeStorage(storageFactory)
                     }) {
                         Icon(Icons.Default.Add, null)
                         Text(name)
@@ -50,9 +45,7 @@ fun NavigatorPane(appState: AppState, modifier: Modifier = Modifier) {
                     }, {
                         FolderContentView(appState, fileTree, fileTree.root)
                     }, onExpand = {
-                        with(appState) {
-                            scope.launchRenewFolderList(fileTree.root)
-                        }
+                        appState.launchRenewFolderList(fileTree.root)
                     })
                 }
             }
@@ -82,11 +75,10 @@ private fun FileView(
     fileTree: FileTree,
     file: FileNode
 ) {
-    val scope = rememberCoroutineScope()
     Row(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
         Icon(Icons.Default.Edit, contentDescription = null, tint = LocalContentColor.current)
         Text(file.file.name, modifier = Modifier.clickable {
-            with(appState) { scope.launchFileOpen(file.file) }
+            appState.launchFileOpen(file.file)
         })
         RemoveFile(appState, file)
         MoveCopyFile(appState, fileTree, file)
@@ -102,7 +94,6 @@ fun FolderView(
 ) = Row(
     modifier = Modifier.wrapContentHeight().fillMaxWidth().padding(vertical = 1.dp)
 ) {
-    val scope = rememberCoroutineScope()
     Expandable({
         Text(folder.folder.name)
         AddNode(appState, folder)
@@ -110,8 +101,6 @@ fun FolderView(
     }, {
         FolderContentView(appState, fileTree, folder)
     }, onExpand = {
-        with(appState) {
-            scope.launchRenewFolderList(folder)
-        }
+        appState.launchRenewFolderList(folder)
     })
 }

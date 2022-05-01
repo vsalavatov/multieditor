@@ -41,7 +41,13 @@ fun ErrorPane(appState: AppState) {
             Span({ style { fontWeight("bold") } }) {
                 Text("Error: ")
             }
-            Span { Text(it.toString()) }
+            Span {
+                var msg = it.toString()
+                it.cause?.let {
+                    msg += " cause: $it"
+                }
+                Text(msg)
+            }
             Span({
                 classes(ErrorPaneStyle.close)
                 onClick {

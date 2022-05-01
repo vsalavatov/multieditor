@@ -2,7 +2,6 @@ package dev.salavatov.multieditor.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import dev.salavatov.multieditor.state.AppState
 import dev.salavatov.multieditor.state.FileNode
 import dev.salavatov.multieditor.state.FileTree
@@ -41,8 +40,6 @@ object NavigatorPaneStyle : StyleSheet() {
 
 @Composable
 fun NavigatorPane(appState: AppState) {
-    val scope = rememberCoroutineScope()
-
     val availableStoragesState = remember { appState.navigation.availableStoragesState }
     val configuredStoragesState = remember { appState.navigation.configuredStoragesState }
     Div({
@@ -60,9 +57,7 @@ fun NavigatorPane(appState: AppState) {
                     height(auto)
                 }
                 onClick {
-                    with(appState) {
-                        scope.launchInitializeStorage(namedStorageFactory)
-                    }
+                    appState.launchInitializeStorage(namedStorageFactory)
                 }
                 classes(NavigatorPaneStyle.addStorage)
             }) {
@@ -77,9 +72,7 @@ fun NavigatorPane(appState: AppState) {
                 AddNode(appState, fileTree.root)
                 FolderContentView(appState, fileTree, fileTree.root)
             }, onExpand = {
-                with(appState) {
-                    scope.launchRenewFolderList(fileTree.root)
-                }
+                appState.launchRenewFolderList(fileTree.root)
             })
         }
     }
@@ -127,7 +120,6 @@ private fun FileView(
     fileTree: FileTree,
     file: FileNode
 ) {
-    val scope = rememberCoroutineScope()
     Div({
         style {
             position(Position.Relative)
@@ -138,7 +130,7 @@ private fun FileView(
     }) {
         Span({
             onClick {
-                with(appState) { scope.launchFileOpen(file.file) }
+                appState.launchFileOpen(file.file)
             }
             classes(NavigatorPaneStyle.fileIcon)
         }) { Text(file.file.name) }
@@ -161,7 +153,6 @@ fun FolderView(
         padding(3.px)
     }
 }) {
-    val scope = rememberCoroutineScope()
     Expandable({
         Text(folder.folder.name)
     }, {
@@ -169,8 +160,6 @@ fun FolderView(
         RemoveFolder(appState, folder)
         FolderContentView(appState, fileTree, folder)
     }, onExpand = {
-        with(appState) {
-            scope.launchRenewFolderList(folder)
-        }
+        appState.launchRenewFolderList(folder)
     })
 }

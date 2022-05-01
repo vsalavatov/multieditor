@@ -59,7 +59,6 @@ object NodeActions : StyleSheet() {
 
 @Composable
 fun AddNode(appState: AppState, folder: FolderNode) {
-    val scope = rememberCoroutineScope()
     var showDialog: Boolean by remember { mutableStateOf(false) }
     var filename by remember { mutableStateOf("") }
 
@@ -81,18 +80,14 @@ fun AddNode(appState: AppState, folder: FolderNode) {
                     SpanButton({
                         val fname = filename
                         if (fname != "") {
-                            with(appState) {
-                                scope.launchCreateFileInFolder(folder, fname)
-                            }
+                            appState.launchCreateFileInFolder(folder, fname)
                             showDialog = false
                         }
                     }) { Text("add file") }
                     SpanButton({
                         val fname = filename
                         if (fname != "") {
-                            with(appState) {
-                                scope.launchCreateFolderInFolder(folder, fname)
-                            }
+                            appState.launchCreateFolderInFolder(folder, fname)
                             showDialog = false
                         }
                     }) { Text("add folder") }
@@ -109,7 +104,6 @@ fun AddNode(appState: AppState, folder: FolderNode) {
 
 @Composable
 fun RemoveFolder(appState: AppState, folder: FolderNode) {
-    val scope = rememberCoroutineScope()
     var showDialog by remember { mutableStateOf(false) }
     if (showDialog) {
         ModalDialog(
@@ -120,9 +114,7 @@ fun RemoveFolder(appState: AppState, folder: FolderNode) {
             content = {
                 Div { Text("are you sure you want to remove ${folder.folder.name}?") }
                 SpanButton({
-                    with(appState) {
-                        scope.launchRemoveFolder(folder)
-                    }
+                    appState.launchRemoveFolder(folder)
                     showDialog = false
                 }) { Text("sure!") }
             }
@@ -136,7 +128,6 @@ fun RemoveFolder(appState: AppState, folder: FolderNode) {
 
 @Composable
 fun RemoveFile(appState: AppState, file: FileNode) {
-    val scope = rememberCoroutineScope()
     var showDialog by remember { mutableStateOf(false) }
     if (showDialog) {
         ModalDialog(
@@ -147,9 +138,7 @@ fun RemoveFile(appState: AppState, file: FileNode) {
             content = {
                 Div { Text("are you sure you want to remove ${file.file.name}?") }
                 SpanButton({
-                    with(appState) {
-                        scope.launchRemoveFile(file)
-                    }
+                    appState.launchRemoveFile(file)
                     showDialog = false
                 }) { Text("sure!") }
             }
@@ -163,7 +152,6 @@ fun RemoveFile(appState: AppState, file: FileNode) {
 
 @Composable
 fun MoveCopyFile(appState: AppState, fileTree: FileTree, file: FileNode) {
-    val scope = rememberCoroutineScope()
     var showDialog by remember { mutableStateOf(false) }
     var targetFilename by remember { mutableStateOf(file.file.name) }
     var overwriteFlag by remember { mutableStateOf(false) }
@@ -176,7 +164,7 @@ fun MoveCopyFile(appState: AppState, fileTree: FileTree, file: FileNode) {
             title = { Text("move or copy file") },
             content = {
                 LaunchedEffect(currentFolder) {
-                    with(appState) { scope.launchRenewFolderList(currentFolder) }
+                    appState.launchRenewFolderList(currentFolder)
                 }
                 Div({
                     style {
@@ -199,7 +187,7 @@ fun MoveCopyFile(appState: AppState, fileTree: FileTree, file: FileNode) {
                         }
                     }
                     currentFolder.children.forEach { node ->
-                        when (node) { // val node = currentFolder.children[index]
+                        when (node) {
                             is FileNode -> Div({
                                 onClick {
                                     targetFilename = node.file.name
@@ -246,32 +234,28 @@ fun MoveCopyFile(appState: AppState, fileTree: FileTree, file: FileNode) {
                     }
                     Span {
                         SpanButton({
-                            with(appState) {
-                                scope.launchCopyFileToFolder(
-                                    fileTree,
-                                    file,
-                                    currentFolder,
-                                    targetFilename,
-                                    overwriteFlag
-                                )
-                                showDialog = false
-                            }
+                            appState.launchCopyFileToFolder(
+                                fileTree,
+                                file,
+                                currentFolder,
+                                targetFilename,
+                                overwriteFlag
+                            )
+                            showDialog = false
                         }, attrs = {
                             style {
                                 paddingRight(20.px)
                             }
                         }) { Text("copy") }
                         SpanButton({
-                            with(appState) {
-                                scope.launchMoveFileToFolder(
-                                    fileTree,
-                                    file,
-                                    currentFolder,
-                                    targetFilename,
-                                    overwriteFlag
-                                )
-                                showDialog = false
-                            }
+                            appState.launchMoveFileToFolder(
+                                fileTree,
+                                file,
+                                currentFolder,
+                                targetFilename,
+                                overwriteFlag
+                            )
+                            showDialog = false
                         }) { Text("move") }
                     }
                 }

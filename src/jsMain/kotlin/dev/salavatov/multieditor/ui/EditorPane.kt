@@ -13,7 +13,6 @@ import org.jetbrains.compose.web.dom.*
 
 @Composable
 fun EditorPane(appState: AppState) {
-    val coroutineScope = rememberCoroutineScope()
     val editorState = remember { appState.editor }
 
     Div({
@@ -32,7 +31,7 @@ fun EditorPane(appState: AppState) {
                 }
                 Button({
                     onClick {
-                        with(appState) { coroutineScope.launchSaveContent() }
+                        appState.launchSaveContent()
                     }
                 }) {
                     Text("save")

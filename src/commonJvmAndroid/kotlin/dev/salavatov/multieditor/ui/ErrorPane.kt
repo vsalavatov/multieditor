@@ -33,7 +33,11 @@ fun ErrorPane(appState: AppState) {
         ) {
             Row(modifier = Modifier.fillMaxWidth(0.8f)) {
                 Text("Error: ", fontWeight = FontWeight.Bold)
-                Text(it.toString())
+                var msg = it.toString()
+                it.cause?.let {
+                    msg += " cause: $it"
+                }
+                Text(msg)
             }
             Text(
                 "x",

@@ -19,7 +19,6 @@ import dev.salavatov.multieditor.state.FolderNode
 
 @Composable
 fun AddNode(appState: AppState, folder: FolderNode) {
-    val scope = rememberCoroutineScope()
     var showDialog: Boolean by remember { mutableStateOf(false) }
     var filename by remember { mutableStateOf("") }
 
@@ -42,9 +41,7 @@ fun AddNode(appState: AppState, folder: FolderNode) {
                         Button(onClick = {
                             val fname = filename
                             if (fname != "") {
-                                with(appState) {
-                                    scope.launchCreateFileInFolder(folder, fname)
-                                }
+                                appState.launchCreateFileInFolder(folder, fname)
                                 showDialog = false
                             }
                         }) { Text("add file") }
@@ -52,9 +49,7 @@ fun AddNode(appState: AppState, folder: FolderNode) {
                         Button(onClick = {
                             val fname = filename
                             if (fname != "") {
-                                with(appState) {
-                                    scope.launchCreateFolderInFolder(folder, fname)
-                                }
+                                appState.launchCreateFolderInFolder(folder, fname)
                                 showDialog = false
                             }
                         }) { Text("add folder") }
@@ -67,7 +62,6 @@ fun AddNode(appState: AppState, folder: FolderNode) {
 
 @Composable
 fun RemoveFolder(appState: AppState, folder: FolderNode) {
-    val scope = rememberCoroutineScope()
     var showDialog by remember { mutableStateOf(false) }
     if (showDialog) {
         AlertDialog(
@@ -76,12 +70,10 @@ fun RemoveFolder(appState: AppState, folder: FolderNode) {
             },
             title = "folder remove",
             content = {
-                Text("are you sure you want to remove ${folder.folder.name}?", modifier = Modifier.width(300.dp))
+                Text("are you sure you want to remove ${folder.folder.name}?", modifier = Modifier.fillMaxWidth())
                 Row(modifier = Modifier.padding(3.dp)) {
                     Button(onClick = {
-                        with(appState) {
-                            scope.launchRemoveFolder(folder)
-                        }
+                        appState.launchRemoveFolder(folder)
                         showDialog = false
                     }) { Text("sure!") }
                 }
@@ -93,7 +85,6 @@ fun RemoveFolder(appState: AppState, folder: FolderNode) {
 
 @Composable
 fun RemoveFile(appState: AppState, file: FileNode) {
-    val scope = rememberCoroutineScope()
     var showDialog by remember { mutableStateOf(false) }
     if (showDialog) {
         AlertDialog(
@@ -103,12 +94,10 @@ fun RemoveFile(appState: AppState, file: FileNode) {
             title = "file remove",
             content = {
                 Column(modifier = Modifier.wrapContentSize()) {
-                    Text("are you sure you want to remove ${file.file.name}?", modifier = Modifier.width(300.dp))
+                    Text("are you sure you want to remove ${file.file.name}?", modifier = Modifier.fillMaxWidth())
                     Row(modifier = Modifier.padding(3.dp)) {
                         Button(onClick = {
-                            with(appState) {
-                                scope.launchRemoveFile(file)
-                            }
+                            appState.launchRemoveFile(file)
                             showDialog = false
                         }) { Text("sure!") }
                     }
@@ -121,7 +110,6 @@ fun RemoveFile(appState: AppState, file: FileNode) {
 
 @Composable
 fun MoveCopyFile(appState: AppState, fileTree: FileTree, file: FileNode) {
-    val scope = rememberCoroutineScope()
     var showDialog by remember { mutableStateOf(false) }
     var targetFilename by remember { mutableStateOf(file.file.name) }
     var overwriteFlag by remember { mutableStateOf(false) }
@@ -135,7 +123,7 @@ fun MoveCopyFile(appState: AppState, fileTree: FileTree, file: FileNode) {
             title = "move or copy file",
             content = {
                 LaunchedEffect(currentFolder) {
-                    with(appState) { scope.launchRenewFolderList(currentFolder) }
+                    appState.launchRenewFolderList(currentFolder)
                 }
                 val element = Modifier.padding(2.dp).wrapContentSize()
                 Column(
@@ -143,7 +131,7 @@ fun MoveCopyFile(appState: AppState, fileTree: FileTree, file: FileNode) {
                     verticalArrangement = Arrangement.Top
                 ) {
                     Icon(Icons.Default.Refresh, "refresh list", modifier = element.clickable {
-                        with(appState) { scope.launchRenewFolderList(currentFolder) }
+                        appState.launchRenewFolderList(currentFolder)
                     })
                     currentFolder.parent?.let { parent ->
                         Row(modifier = element.clickable {
@@ -189,29 +177,25 @@ fun MoveCopyFile(appState: AppState, fileTree: FileTree, file: FileNode) {
                     }
                     Row(modifier = Modifier.padding(2.dp).wrapContentSize()) {
                         Button(onClick = {
-                            with(appState) {
-                                scope.launchCopyFileToFolder(
-                                    fileTree,
-                                    file,
-                                    currentFolder,
-                                    targetFilename,
-                                    overwriteFlag
-                                )
-                                showDialog = false
-                            }
+                            appState.launchCopyFileToFolder(
+                                fileTree,
+                                file,
+                                currentFolder,
+                                targetFilename,
+                                overwriteFlag
+                            )
+                            showDialog = false
                         }) { Text("copy") }
                         Spacer(modifier = Modifier.width(20.dp))
                         Button(onClick = {
-                            with(appState) {
-                                scope.launchMoveFileToFolder(
-                                    fileTree,
-                                    file,
-                                    currentFolder,
-                                    targetFilename,
-                                    overwriteFlag
-                                )
-                                showDialog = false
-                            }
+                            appState.launchMoveFileToFolder(
+                                fileTree,
+                                file,
+                                currentFolder,
+                                targetFilename,
+                                overwriteFlag
+                            )
+                            showDialog = false
                         }) { Text("move") }
                     }
                 }
