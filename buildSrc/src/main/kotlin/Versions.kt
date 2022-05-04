@@ -10,5 +10,5 @@ object Versions {
     const val androidTargetSdk = 29
     const val androidCompileSdk = 31
 
-    const val multifs = "0.2.0"
+    const val multifs = "0.3.0"
 }
