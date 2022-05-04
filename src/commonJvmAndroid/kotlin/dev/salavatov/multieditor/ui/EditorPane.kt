@@ -4,9 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -21,7 +19,14 @@ import dev.salavatov.multieditor.state.AppState
 @Composable
 fun EditorPane(appState: AppState, modifier: Modifier = Modifier) {
     val editorState = remember { appState.editor }
-
+    var size by remember { mutableStateOf(0L) }
+    LaunchedEffect(appState.editor.file) {
+        appState.editor.file?.let {
+            appState.launchSafe {
+                size = it.getSize()
+            }
+        }
+    }
     Column(modifier = modifier.then(Modifier.fillMaxSize(1.0f)).onPreviewKeyEvent {
         if (it.isCtrlPressed && it.key == Key.S) {
             appState.launchSaveContent()
@@ -43,6 +48,7 @@ fun EditorPane(appState: AppState, modifier: Modifier = Modifier) {
                 },
                 modifier = Modifier.padding(10.dp)
             )
+            Text("bytes: $size")
         }
         Divider(modifier = Modifier.fillMaxWidth(), color = Color.LightGray)
         CompositionLocalProvider(LocalTextSelectionColors provides TextSelectionColors(Color.White, Color.LightGray)) {
