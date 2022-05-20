@@ -71,6 +71,7 @@ fun EditorPane(appState: AppState) {
                 }
                 placeholder("content...")
                 style {
+                    position(Position.Absolute)
                     width(85.percent)
                     height(93.percent)
                     property("resize", "none")
